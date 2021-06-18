@@ -1,0 +1,25 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#SamacSys ECAD Model ADP3338AKCZ-3.3-RL
+#/344929/306298/2.47/4/4/Integrated Circuit
+DEF ADP3338AKCZ-3.3-RL IC 0 30 Y Y 1 F N
+F0 "IC" 1050 300 50 H V L CNN
+F1 "ADP3338AKCZ-3.3-RL" 1050 200 50 H V L CNN
+F2 "SOT230P700X180-4N" 1050 100 50 H I L CNN
+F3 "http://www.analog.com/media/en/technical-documentation/data-sheets/ADP3338.pdf" 1050 0 50 H I L CNN
+F4 "LDO Voltage Regulator anyCAP 1A SOT223-3 Analog Devices ADP3338AKCZ-3.3-RL, LDO Voltage Regulator, 1.6A, 3.3 V +/-0.8%, 2.7  8 Vin, 3 + Tab-Pin SOT-223" 1050 -100 50 H I L CNN "Description"
+F5 "1.8" 1050 -200 50 H I L CNN "Height"
+F6 "584-ADP3338AKCZ3.3R" 1050 -300 50 H I L CNN "Mouser Part Number"
+F7 "https://www.mouser.co.uk/ProductDetail/Analog-Devices/ADP3338AKCZ-33-RL?qs=WIvQP4zGangPtIg4n%252B1tTA%3D%3D" 1050 -400 50 H I L CNN "Mouser Price/Stock"
+F8 "Analog Devices" 1050 -500 50 H I L CNN "Manufacturer_Name"
+F9 "ADP3338AKCZ-3.3-RL" 1050 -600 50 H I L CNN "Manufacturer_Part_Number"
+DRAW
+X GND 1 0 0 200 R 50 50 0 0 P
+X OUT_1 2 0 -100 200 R 50 50 0 0 P
+X IN 3 0 -200 200 R 50 50 0 0 P
+X OUT_2 4 1200 0 200 L 50 50 0 0 P
+P 5 0 1 6 200 100 1000 100 1000 -300 200 -300 200 100 N
+ENDDRAW
+ENDDEF
+#
+#End Library
