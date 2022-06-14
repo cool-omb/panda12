@@ -5,4 +5,5 @@
   (lib (name Regulator_Linear_add)(type KiCad)(uri C:/workspace/ble-macro-keyboard/KiCad/components/footprint/Regulator_Linear_add.pretty)(options "")(descr ""))
   (lib (name Battery_Management_add)(type KiCad)(uri C:/workspace/ble-macro-keyboard/KiCad/components/footprint/Battery_Management_add.pretty)(options "")(descr ""))
   (lib (name Button_Switch_SMD_add)(type KiCad)(uri C:/workspace/ble-macro-keyboard/KiCad/components/footprint/Button_Switch_SMD_add.pretty)(options "")(descr ""))
+  (lib (name Ble_keyboard)(type KiCad)(uri C:/workspace/ble-macro-keyboard/KiCad/components/Ble_keyboard.pretty)(options "")(descr ""))
 )

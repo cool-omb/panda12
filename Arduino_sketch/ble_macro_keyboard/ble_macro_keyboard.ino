@@ -33,6 +33,38 @@ void PwmLed(int channel) {
   brightness[channel] += diff[channel];
 }
 
+int read_all_sw() {
+  unsigned int pushed = 0;
+  if(digitalRead(SETTINGSW) == LOW) {
+    pushed |= (1<<0);
+  }
+  if(digitalRead(KEYSW_1) == LOW) {
+    pushed |= (1<<1);
+  }
+  if(digitalRead(KEYSW_2) == LOW) {
+    pushed |= (1<<2);
+  }
+  if(digitalRead(KEYSW_3) == LOW) {
+    pushed |= (1<<3);
+  }
+  if(digitalRead(KEYSW_4) == LOW) {
+    pushed |= (1<<4);
+  }
+  if(digitalRead(KEYSW_5) == LOW) {
+    pushed |= (1<<5);
+  }
+  if(digitalRead(KEYSW_6) == LOW) {
+    pushed |= (1<<6);
+  }
+  if(digitalRead(KEYSW_7) == LOW) {
+    pushed |= (1<<7);
+  }
+  if(digitalRead(KEYSW_8) == LOW) {
+    pushed |= (1<<8);
+  }
+  return pushed;
+}
+
 void setup() {
   pinMode(KEYSW_1, INPUT_PULLUP);
   pinMode(KEYSW_2, INPUT_PULLUP);
@@ -59,104 +91,68 @@ void setup() {
 
 void loop() {
   // static variable defind.
-  static bool keysw_pushed[9] = {
-    false, false, false, false, false, false, false, false, false
-  };
-  // each sw pushed.
-  if(digitalRead(SETTINGSW) == LOW) {
-    keysw_pushed[0] = true;
-  } else {
-    keysw_pushed[0] = false;
-  }
-  if(digitalRead(KEYSW_1) == LOW) {
-    PwmLed(LEDC_CHANNEL_R);
-    delay(10);
-    keysw_pushed[1] = true;
-  } else {
-    keysw_pushed[1] = false;
-  }
-  if(digitalRead(KEYSW_2) == LOW) {
-    PwmLed(LEDC_CHANNEL_G);
-    delay(10);
-    keysw_pushed[2] = true;
-  } else {
-    keysw_pushed[2] = false;
-  }
-  if(digitalRead(KEYSW_3) == LOW) {
-    PwmLed(LEDC_CHANNEL_B);
-    delay(10);
-    keysw_pushed[3] = true;
-  } else {
-    keysw_pushed[3] = false;
-  }
-  if(bleKeyboard.isConnected()) {
-    if(digitalRead(KEYSW_4) == LOW) {
-      if(!keysw_pushed[4]) {
-        bleKeyboard.press('a');
-        delay(10);
-      }
-      keysw_pushed[4] = true;
-    } else {
-      if(keysw_pushed[4]) {
-        bleKeyboard.release('a');
-        delay(10);
-      }
-      keysw_pushed[4] = false;
+  static unsigned int sw_pushed_saved = 0;
+  // measures for chattering.
+  if(sw_pushed_saved != read_all_sw()) {
+    digitalWrite(BUILTIN_LED, HIGH);
+    delay(5);
+    // for LED
+    unsigned int sw_pushed = read_all_sw();
+    unsigned int sw_pushed_xor = sw_pushed ^ sw_pushed_saved;
+    if(sw_pushed & (1<<1)) {
+      PwmLed(LEDC_CHANNEL_R);
     }
-    if(digitalRead(KEYSW_5) == LOW) {
-      if(!keysw_pushed[5]) {
-        bleKeyboard.press(KEY_LEFT_CTRL);
-        bleKeyboard.press('c');
-        delay(10);
-      }
-      keysw_pushed[5] = true;
-    } else {
-      if(keysw_pushed[5]) {
-        bleKeyboard.release(KEY_LEFT_CTRL);
-        bleKeyboard.release('c');
-        delay(10);
-      }
-      keysw_pushed[5] = false;
+    if(sw_pushed & (1<<2)) {
+      PwmLed(LEDC_CHANNEL_G);
     }
-    if(digitalRead(KEYSW_6) == LOW) {
-      if(!keysw_pushed[6]) {
-        bleKeyboard.press(KEY_LEFT_CTRL);
-        bleKeyboard.press('v');
-        delay(10);
-      }
-      keysw_pushed[6] = true;
-    } else {
-      if(keysw_pushed[6]) {
-        bleKeyboard.release(KEY_LEFT_CTRL);
-        bleKeyboard.release('v');
-        delay(10);
-      }
-      keysw_pushed[6] = false;
+    if(sw_pushed & (1<<3)) {
+      PwmLed(LEDC_CHANNEL_B);
     }
-    if(digitalRead(KEYSW_7) == LOW) {
-      if(!keysw_pushed[7]) {
-        bleKeyboard.print("Alltheworldisastage");
-        delay(10);
-      }
-      keysw_pushed[7] = true;
-    } else {
-      keysw_pushed[7] = false;
+    // setting sw
+    if(sw_pushed_xor & (1<<0)) {
+      //
     }
-    if(digitalRead(KEYSW_8) == LOW) {
-      if(!keysw_pushed[8]) {
-        bleKeyboard.print("ta_toshiki_kura@nnn.ac.jp");
-        delay(10);
+    // ble
+    if(bleKeyboard.isConnected()) {
+      if(sw_pushed_xor & (1<<4)) {
+        if(sw_pushed & (1<<4)) {
+          bleKeyboard.press(KEY_BACKSPACE);
+        } else {
+          bleKeyboard.release(KEY_BACKSPACE);
+        }
       }
-      keysw_pushed[8] = true;
-    } else {
-      keysw_pushed[8] = false;
+      if(sw_pushed_xor & (1<<5)) {
+        if(sw_pushed & (1<<5)) {
+          bleKeyboard.press('2');
+        } else {
+          bleKeyboard.release('2');
+        }
+      }
+      if(sw_pushed_xor & (1<<6)) {
+        if(sw_pushed & (1<<6)) {
+          bleKeyboard.press('\"');
+        } else {
+          bleKeyboard.release('\"');
+        }
+      }
+      if(sw_pushed_xor & (1<<7)) {
+        if(sw_pushed & (1<<7)) {
+          bleKeyboard.press(KEY_LEFT_ALT);
+          bleKeyboard.press(KEY_TAB);
+        } else {
+          bleKeyboard.release(KEY_LEFT_ALT);
+          bleKeyboard.release(KEY_TAB);
+        }
+      }
+      if(sw_pushed_xor & (1<<8)) {
+        if(sw_pushed & (1<<8)) {
+          bleKeyboard.press(KEY_RETURN);
+        } else {
+          bleKeyboard.release(KEY_RETURN);
+        }
+      }
     }
+    sw_pushed_saved = sw_pushed;
     digitalWrite(BUILTIN_LED, LOW);
-    for(const auto& pushed : keysw_pushed) {
-      if(pushed) {
-        digitalWrite(BUILTIN_LED, HIGH);
-        break;
-      }
-    }
   }
 }
