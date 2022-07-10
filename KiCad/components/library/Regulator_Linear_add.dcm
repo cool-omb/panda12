@@ -1,8 +1,0 @@
-EESchema-DOCLIB  Version 2.0
-#
-$CMP ADP3338AKCZ-3.3-RL
-D LDO Voltage Regulator anyCAP 1A SOT223-3 Analog Devices ADP3338AKCZ-3.3-RL, LDO Voltage Regulator, 1.6A, 3.3 V +/-0.8%, 2.7  8 Vin, 3 + Tab-Pin SOT-223
-F http://www.analog.com/media/en/technical-documentation/data-sheets/ADP3338.pdf
-$ENDCMP
-#
-#End Doc Library
