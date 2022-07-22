@@ -1,5 +1,5 @@
 (fp_lib_table
-  (lib (name "Keyswitches")(type "KiCad")(uri "C:/workspace/ble-macro-keyboard/KiCad/components/keyswitches.pretty")(options "")(descr ""))
-  (lib (name "Ble_keyboard")(type "KiCad")(uri "C:/workspace/ble-macro-keyboard/KiCad/components/Ble_keyboard.pretty")(options "")(descr ""))
-  (lib (name "Evaluation_board")(type "KiCad")(uri "C:/workspace/ble-macro-keyboard/KiCad/components/Evaluation_board.pretty")(options "")(descr ""))
+  (lib (name "Keyswitches")(type "KiCad")(uri "${KIPRJMOD}/components/keyswitches.pretty")(options "")(descr ""))
+  (lib (name "Ble_keyboard")(type "KiCad")(uri "${KIPRJMOD}/components/Ble_keyboard.pretty")(options "")(descr ""))
+  (lib (name "Evaluation_board")(type "KiCad")(uri "${KIPRJMOD}/components/Evaluation_board.pretty")(options "")(descr ""))
 )

@@ -1,4 +1,4 @@
 (sym_lib_table
-  (lib (name "ble_keyboard")(type "Legacy")(uri "C:/workspace/ble-macro-keyboard/KiCad/components/ble_keyboard.lib")(options "")(descr ""))
-  (lib (name "ESP32-DEVKITC-32D")(type "Legacy")(uri "C:/workspace/ble-macro-keyboard/KiCad/components/ESP32-DEVKITC-32D.lib")(options "")(descr ""))
+  (lib (name "ble_keyboard")(type "Legacy")(uri "${KIPRJMOD}/components/ble_keyboard.lib")(options "")(descr ""))
+  (lib (name "ESP32-DEVKITC-32D")(type "Legacy")(uri "${KIPRJMOD}/components/ESP32-DEVKITC-32D.lib")(options "")(descr ""))
 )
