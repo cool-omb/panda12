@@ -3007,7 +3007,7 @@
     (uuid 8a6a8ab4-f005-4e7a-89fa-0d032a129ddd)
     (property "Reference" "J1" (id 0) (at 145.415 55.88 0))
     (property "Value" "Conn_01x03_Male" (id 1) (at 145.415 58.42 0))
-    (property "Footprint" "" (id 2) (at 144.78 63.5 0)
+    (property "Footprint" "Ble_keyboard:JST_SHL_SM03B-SHLS-TF_1x03-1MP_P1.00mm_Horizontal" (id 2) (at 144.78 63.5 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (id 3) (at 144.78 63.5 0)
@@ -3348,7 +3348,7 @@
       (reference "IC1") (unit 1) (value "ADP3338AKCZ-3.3-RL") (footprint "Ble_keyboard:SOT230P700X180-4N")
     )
     (path "/8a6a8ab4-f005-4e7a-89fa-0d032a129ddd"
-      (reference "J1") (unit 1) (value "Conn_01x03_Male") (footprint "")
+      (reference "J1") (unit 1) (value "Conn_01x03_Male") (footprint "Ble_keyboard:JST_SHL_SM03B-SHLS-TF_1x03-1MP_P1.00mm_Horizontal")
     )
     (path "/00000000-0000-0000-0000-000060aa8b9d"
       (reference "Q1") (unit 1) (value "IRLML6402") (footprint "Package_TO_SOT_SMD:SOT-23")
