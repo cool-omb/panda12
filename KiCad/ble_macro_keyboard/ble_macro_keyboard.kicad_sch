@@ -2154,7 +2154,7 @@
   (symbol (lib_id "Device:R") (at 38.1 50.8 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060aa59b1)
-    (property "Reference" "R1" (id 0) (at 39.878 49.6316 0)
+    (property "Reference" "R7" (id 0) (at 39.878 49.6316 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "100k" (id 1) (at 39.878 51.943 0)
@@ -2173,7 +2173,7 @@
   (symbol (lib_id "Device:C") (at 50.8 50.8 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060aa5dc0)
-    (property "Reference" "C2" (id 0) (at 53.721 49.6316 0)
+    (property "Reference" "C5" (id 0) (at 53.721 49.6316 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "4.7u" (id 1) (at 53.721 51.943 0)
@@ -2192,7 +2192,7 @@
   (symbol (lib_id "Device:R") (at 63.5 63.5 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060aa6b57)
-    (property "Reference" "R2" (id 0) (at 65.278 62.3316 0)
+    (property "Reference" "R6" (id 0) (at 65.278 62.3316 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "2k" (id 1) (at 65.278 64.643 0)
@@ -2211,7 +2211,7 @@
   (symbol (lib_id "Device:C") (at 114.3 63.5 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060aa7add)
-    (property "Reference" "C3" (id 0) (at 117.221 62.3316 0)
+    (property "Reference" "C6" (id 0) (at 117.221 62.3316 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "10u" (id 1) (at 117.221 64.643 0)
@@ -2265,7 +2265,7 @@
   (symbol (lib_id "Device:R") (at 127 41.91 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060aaf0a8)
-    (property "Reference" "R3" (id 0) (at 128.778 40.7416 0)
+    (property "Reference" "R5" (id 0) (at 128.778 40.7416 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "470" (id 1) (at 128.778 43.053 0)
@@ -2284,7 +2284,7 @@
   (symbol (lib_id "Device:C") (at 241.3 68.58 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060ab3fad)
-    (property "Reference" "C6" (id 0) (at 244.221 67.4116 0)
+    (property "Reference" "C4" (id 0) (at 244.221 67.4116 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "1u" (id 1) (at 244.221 69.723 0)
@@ -2351,7 +2351,7 @@
   (symbol (lib_id "Switch:SW_Push") (at 50.8 101.6 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060abe1e8)
-    (property "Reference" "SW2" (id 0) (at 50.8 94.361 0))
+    (property "Reference" "SW3" (id 0) (at 50.8 94.361 0))
     (property "Value" "SW_Push" (id 1) (at 50.8 96.6724 0))
     (property "Footprint" "Keyswitches:Kailh_socket_MX" (id 2) (at 50.8 96.52 0)
       (effects (font (size 1.27 1.27)) hide)
@@ -2382,7 +2382,7 @@
   (symbol (lib_id "Switch:SW_Push") (at 50.8 114.3 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060ac1613)
-    (property "Reference" "SW3" (id 0) (at 50.8 107.061 0))
+    (property "Reference" "SW4" (id 0) (at 50.8 107.061 0))
     (property "Value" "SW_Push" (id 1) (at 50.8 109.3724 0))
     (property "Footprint" "Keyswitches:Kailh_socket_MX" (id 2) (at 50.8 109.22 0)
       (effects (font (size 1.27 1.27)) hide)
@@ -2413,7 +2413,7 @@
   (symbol (lib_id "Switch:SW_Push") (at 50.8 127 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060ac2a34)
-    (property "Reference" "SW4" (id 0) (at 50.8 119.761 0))
+    (property "Reference" "SW5" (id 0) (at 50.8 119.761 0))
     (property "Value" "SW_Push" (id 1) (at 50.8 122.0724 0))
     (property "Footprint" "Keyswitches:Kailh_socket_MX" (id 2) (at 50.8 121.92 0)
       (effects (font (size 1.27 1.27)) hide)
@@ -2444,7 +2444,7 @@
   (symbol (lib_id "Switch:SW_Push") (at 50.8 139.7 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060ac2a4a)
-    (property "Reference" "SW5" (id 0) (at 50.8 132.461 0))
+    (property "Reference" "SW6" (id 0) (at 50.8 132.461 0))
     (property "Value" "SW_Push" (id 1) (at 50.8 134.7724 0))
     (property "Footprint" "Keyswitches:Kailh_socket_MX" (id 2) (at 50.8 134.62 0)
       (effects (font (size 1.27 1.27)) hide)
@@ -2475,7 +2475,7 @@
   (symbol (lib_id "Switch:SW_Push") (at 50.8 152.4 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060ac4a02)
-    (property "Reference" "SW6" (id 0) (at 50.8 145.161 0))
+    (property "Reference" "SW7" (id 0) (at 50.8 145.161 0))
     (property "Value" "SW_Push" (id 1) (at 50.8 147.4724 0))
     (property "Footprint" "Keyswitches:Kailh_socket_MX" (id 2) (at 50.8 147.32 0)
       (effects (font (size 1.27 1.27)) hide)
@@ -2506,7 +2506,7 @@
   (symbol (lib_id "Switch:SW_Push") (at 50.8 165.1 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060ac4a18)
-    (property "Reference" "SW7" (id 0) (at 50.8 157.861 0))
+    (property "Reference" "SW8" (id 0) (at 50.8 157.861 0))
     (property "Value" "SW_Push" (id 1) (at 50.8 160.1724 0))
     (property "Footprint" "Keyswitches:Kailh_socket_MX" (id 2) (at 50.8 160.02 0)
       (effects (font (size 1.27 1.27)) hide)
@@ -2537,7 +2537,7 @@
   (symbol (lib_id "Switch:SW_Push") (at 50.8 177.8 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060ac4a2e)
-    (property "Reference" "SW8" (id 0) (at 50.8 170.561 0))
+    (property "Reference" "SW9" (id 0) (at 50.8 170.561 0))
     (property "Value" "SW_Push" (id 1) (at 50.8 172.8724 0))
     (property "Footprint" "Keyswitches:Kailh_socket_MX" (id 2) (at 50.8 172.72 0)
       (effects (font (size 1.27 1.27)) hide)
@@ -2568,7 +2568,7 @@
   (symbol (lib_id "Switch:SW_Push") (at 114.3 88.9 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060ac4a44)
-    (property "Reference" "SW9" (id 0) (at 114.3 81.661 0))
+    (property "Reference" "SW10" (id 0) (at 114.3 81.661 0))
     (property "Value" "SW_Push" (id 1) (at 114.3 83.9724 0))
     (property "Footprint" "Keyswitches:Kailh_socket_MX" (id 2) (at 114.3 83.82 0)
       (effects (font (size 1.27 1.27)) hide)
@@ -2615,7 +2615,7 @@
   (symbol (lib_id "Device:R") (at 115.57 172.72 270) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060ad9011)
-    (property "Reference" "R5" (id 0) (at 115.57 167.4622 90))
+    (property "Reference" "R1" (id 0) (at 115.57 167.4622 90))
     (property "Value" "10" (id 1) (at 115.57 169.7736 90))
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" (id 2) (at 115.57 170.942 90)
       (effects (font (size 1.27 1.27)) hide)
@@ -2630,7 +2630,7 @@
   (symbol (lib_id "Device:R") (at 115.57 160.02 270) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060ad9686)
-    (property "Reference" "R4" (id 0) (at 115.57 154.7622 90))
+    (property "Reference" "R3" (id 0) (at 115.57 154.7622 90))
     (property "Value" "10" (id 1) (at 115.57 157.0736 90))
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" (id 2) (at 115.57 158.242 90)
       (effects (font (size 1.27 1.27)) hide)
@@ -2645,7 +2645,7 @@
   (symbol (lib_id "Device:R") (at 115.57 185.42 270) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060ad9b26)
-    (property "Reference" "R6" (id 0) (at 115.57 180.1622 90))
+    (property "Reference" "R2" (id 0) (at 115.57 180.1622 90))
     (property "Value" "10" (id 1) (at 115.57 182.4736 90))
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" (id 2) (at 115.57 183.642 90)
       (effects (font (size 1.27 1.27)) hide)
@@ -2660,7 +2660,7 @@
   (symbol (lib_id "Device:R") (at 128.27 160.02 270) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060ad9dc9)
-    (property "Reference" "R7" (id 0) (at 128.27 154.7622 90))
+    (property "Reference" "R4" (id 0) (at 128.27 154.7622 90))
     (property "Value" "47" (id 1) (at 128.27 157.0736 90))
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder" (id 2) (at 128.27 158.242 90)
       (effects (font (size 1.27 1.27)) hide)
@@ -3021,7 +3021,7 @@
   (symbol (lib_id "Device:C") (at 127 63.5 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 8ba99c1a-ca61-474c-ad83-dc5bf43afa1e)
-    (property "Reference" "C4" (id 0) (at 129.921 62.3316 0)
+    (property "Reference" "C2" (id 0) (at 129.921 62.3316 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.01u" (id 1) (at 129.921 64.643 0)
@@ -3072,7 +3072,7 @@
   (symbol (lib_id "Device:C") (at 182.88 63.5 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid a3b39fe6-55cc-4857-adc1-37ac836db09c)
-    (property "Reference" "C5" (id 0) (at 185.801 62.3316 0)
+    (property "Reference" "C3" (id 0) (at 185.801 62.3316 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "1u" (id 1) (at 185.801 64.643 0)
@@ -3108,8 +3108,8 @@
   (symbol (lib_id "Switch:SW_Push") (at 50.8 88.9 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid b0a4f277-6095-4cbb-9df7-ac5b97eca521)
-    (property "Reference" "SW1" (id 0) (at 50.8 82.2792 0))
-    (property "Value" "SW_Push" (id 1) (at 50.8 84.8161 0))
+    (property "Reference" "SW2" (id 0) (at 50.8 81.28 0))
+    (property "Value" "SW_Push" (id 1) (at 50.8 83.82 0))
     (property "Footprint" "Ble_keyboard:SW_Push_Dual_x2_TS-4401" (id 2) (at 50.8 83.82 0)
       (effects (font (size 1.27 1.27)) hide)
     )
@@ -3155,8 +3155,8 @@
   (symbol (lib_id "Switch:SW_SPDT") (at 223.52 50.8 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid bd0d115b-9060-4752-8338-78f18cfecec7)
-    (property "Reference" "SW10" (id 0) (at 223.52 44.1792 0))
-    (property "Value" "SW_SPDT" (id 1) (at 223.52 46.7161 0))
+    (property "Reference" "SW1" (id 0) (at 223.52 43.18 0))
+    (property "Value" "SW_SPDT" (id 1) (at 223.52 45.72 0))
     (property "Footprint" "Ble_keyboard:SW_Slide_SPDT_MSK-12C02" (id 2) (at 223.52 50.8 0)
       (effects (font (size 1.27 1.27)) hide)
     )
@@ -3323,20 +3323,20 @@
     (path "/70e3b14f-9429-44d1-9aa1-0687e7b7eafe"
       (reference "C1") (unit 1) (value "0.01u") (footprint "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder")
     )
-    (path "/00000000-0000-0000-0000-000060aa5dc0"
-      (reference "C2") (unit 1) (value "4.7u") (footprint "Capacitor_THT:CP_Radial_D5.0mm_P2.00mm")
-    )
-    (path "/00000000-0000-0000-0000-000060aa7add"
-      (reference "C3") (unit 1) (value "10u") (footprint "Capacitor_THT:CP_Radial_D5.0mm_P2.00mm")
-    )
     (path "/8ba99c1a-ca61-474c-ad83-dc5bf43afa1e"
-      (reference "C4") (unit 1) (value "0.01u") (footprint "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder")
+      (reference "C2") (unit 1) (value "0.01u") (footprint "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder")
     )
     (path "/a3b39fe6-55cc-4857-adc1-37ac836db09c"
-      (reference "C5") (unit 1) (value "1u") (footprint "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder")
+      (reference "C3") (unit 1) (value "1u") (footprint "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder")
     )
     (path "/00000000-0000-0000-0000-000060ab3fad"
-      (reference "C6") (unit 1) (value "1u") (footprint "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder")
+      (reference "C4") (unit 1) (value "1u") (footprint "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder")
+    )
+    (path "/00000000-0000-0000-0000-000060aa5dc0"
+      (reference "C5") (unit 1) (value "4.7u") (footprint "Capacitor_THT:CP_Radial_D5.0mm_P2.00mm")
+    )
+    (path "/00000000-0000-0000-0000-000060aa7add"
+      (reference "C6") (unit 1) (value "10u") (footprint "Capacitor_THT:CP_Radial_D5.0mm_P2.00mm")
     )
     (path "/00000000-0000-0000-0000-000060aae601"
       (reference "D1") (unit 1) (value "LED") (footprint "LED_THT:LED_D3.0mm")
@@ -3353,56 +3353,56 @@
     (path "/00000000-0000-0000-0000-000060aa8b9d"
       (reference "Q1") (unit 1) (value "IRLML6402") (footprint "Package_TO_SOT_SMD:SOT-23")
     )
-    (path "/00000000-0000-0000-0000-000060aa59b1"
-      (reference "R1") (unit 1) (value "100k") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
-    )
-    (path "/00000000-0000-0000-0000-000060aa6b57"
-      (reference "R2") (unit 1) (value "2k") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
-    )
-    (path "/00000000-0000-0000-0000-000060aaf0a8"
-      (reference "R3") (unit 1) (value "470") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
-    )
-    (path "/00000000-0000-0000-0000-000060ad9686"
-      (reference "R4") (unit 1) (value "10") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
-    )
     (path "/00000000-0000-0000-0000-000060ad9011"
-      (reference "R5") (unit 1) (value "10") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
+      (reference "R1") (unit 1) (value "10") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
     )
     (path "/00000000-0000-0000-0000-000060ad9b26"
-      (reference "R6") (unit 1) (value "10") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
+      (reference "R2") (unit 1) (value "10") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
+    )
+    (path "/00000000-0000-0000-0000-000060ad9686"
+      (reference "R3") (unit 1) (value "10") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
     )
     (path "/00000000-0000-0000-0000-000060ad9dc9"
-      (reference "R7") (unit 1) (value "47") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
+      (reference "R4") (unit 1) (value "47") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
     )
-    (path "/b0a4f277-6095-4cbb-9df7-ac5b97eca521"
-      (reference "SW1") (unit 1) (value "SW_Push") (footprint "Ble_keyboard:SW_Push_Dual_x2_TS-4401")
+    (path "/00000000-0000-0000-0000-000060aaf0a8"
+      (reference "R5") (unit 1) (value "470") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
     )
-    (path "/00000000-0000-0000-0000-000060abe1e8"
-      (reference "SW2") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
+    (path "/00000000-0000-0000-0000-000060aa6b57"
+      (reference "R6") (unit 1) (value "2k") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
     )
-    (path "/00000000-0000-0000-0000-000060ac1613"
-      (reference "SW3") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
-    )
-    (path "/00000000-0000-0000-0000-000060ac2a34"
-      (reference "SW4") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
-    )
-    (path "/00000000-0000-0000-0000-000060ac2a4a"
-      (reference "SW5") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
-    )
-    (path "/00000000-0000-0000-0000-000060ac4a02"
-      (reference "SW6") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
-    )
-    (path "/00000000-0000-0000-0000-000060ac4a18"
-      (reference "SW7") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
-    )
-    (path "/00000000-0000-0000-0000-000060ac4a2e"
-      (reference "SW8") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
-    )
-    (path "/00000000-0000-0000-0000-000060ac4a44"
-      (reference "SW9") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
+    (path "/00000000-0000-0000-0000-000060aa59b1"
+      (reference "R7") (unit 1) (value "100k") (footprint "Resistor_SMD:R_0603_1608Metric_Pad1.05x0.95mm_HandSolder")
     )
     (path "/bd0d115b-9060-4752-8338-78f18cfecec7"
-      (reference "SW10") (unit 1) (value "SW_SPDT") (footprint "Ble_keyboard:SW_Slide_SPDT_MSK-12C02")
+      (reference "SW1") (unit 1) (value "SW_SPDT") (footprint "Ble_keyboard:SW_Slide_SPDT_MSK-12C02")
+    )
+    (path "/b0a4f277-6095-4cbb-9df7-ac5b97eca521"
+      (reference "SW2") (unit 1) (value "SW_Push") (footprint "Ble_keyboard:SW_Push_Dual_x2_TS-4401")
+    )
+    (path "/00000000-0000-0000-0000-000060abe1e8"
+      (reference "SW3") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
+    )
+    (path "/00000000-0000-0000-0000-000060ac1613"
+      (reference "SW4") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
+    )
+    (path "/00000000-0000-0000-0000-000060ac2a34"
+      (reference "SW5") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
+    )
+    (path "/00000000-0000-0000-0000-000060ac2a4a"
+      (reference "SW6") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
+    )
+    (path "/00000000-0000-0000-0000-000060ac4a02"
+      (reference "SW7") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
+    )
+    (path "/00000000-0000-0000-0000-000060ac4a18"
+      (reference "SW8") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
+    )
+    (path "/00000000-0000-0000-0000-000060ac4a2e"
+      (reference "SW9") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
+    )
+    (path "/00000000-0000-0000-0000-000060ac4a44"
+      (reference "SW10") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
     )
     (path "/3915b7d0-4999-40ba-aaa6-d0d8aaf70e51"
       (reference "SW11") (unit 1) (value "SW_Push") (footprint "Keyswitches:Kailh_socket_MX")
