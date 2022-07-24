@@ -1,0 +1,4 @@
+[submodule "KiCad/ble_macro_keyboard/components/keyswitches.pretty"]
+	path = KiCad/ble_macro_keyboard/components/keyswitches.pretty
+	url = https://github.com/daprice/keyswitches.pretty.git
+	branch = 2.0
