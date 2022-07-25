@@ -1,7 +1,7 @@
 (footprint "JST_SHL_SM03B-SHLS-TF_1x03-1MP_P1.00mm_Horizontal" (version 20211014) (generator pcbnew)
   (layer "F.Cu")
   (tedit 5B78AD87)
-  (descr "JST SHL series connector, SM05B-SHLS-TF (http://www.jst-mfg.com/product/pdf/eng/eSHL.pdf), generated with kicad-footprint-generator")
+  (descr "JST SHL series connector, SM03B-SHLS-TF (http://www.jst-mfg.com/product/pdf/eng/eSHL.pdf), generated with kicad-footprint-generator")
   (tags "connector JST SHL top entry")
   (attr smd)
   (fp_text reference "REF**" (at 0 -3.5) (layer "F.SilkS")
