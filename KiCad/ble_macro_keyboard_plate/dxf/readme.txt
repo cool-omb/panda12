@@ -1,1 +1,0 @@
-outline: 55mm x 91mm
