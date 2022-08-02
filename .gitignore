@@ -2,7 +2,8 @@
 Arduino_sketch/lib
 
 # KiCADの作業ファイルを除外
-KiCAD/**/*-backups/
-KiCAD/**/_autosave-*
-KiCAD/**/*-cache.*
-KiCAD/**/*-rescue.*
+KiCad/**/*-backups/
+KiCad/**/_autosave-*
+KiCad/**/*-cache.*
+KiCad/**/*-rescue.*
+KiCad/**/*-cache
