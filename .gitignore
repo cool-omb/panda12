@@ -1,1 +1,5 @@
+# Arduinoのライブラリを除外
 Arduino_sketch/lib
+
+# KiCADのバックアップを除外
+KiCAD/**/*-backups/
