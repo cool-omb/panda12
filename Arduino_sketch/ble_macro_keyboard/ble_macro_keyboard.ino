@@ -1,18 +1,23 @@
 #include <BleKeyboard.h>
 
 #define BUILTIN_LED 2
-#define LED_R 17
-#define LED_G 21
-#define LED_B 19
-#define KEYSW_1 33
-#define KEYSW_2 25
-#define KEYSW_3 26
-#define KEYSW_4 27
-#define KEYSW_5 23
-#define KEYSW_6 22
-#define KEYSW_7 18
-#define KEYSW_8 16
-#define SETTINGSW 32
+#define LED_R 25
+#define LED_G 32
+#define LED_B 33
+#define KEYSW_01 16
+#define KEYSW_02 19
+#define KEYSW_03 23
+#define KEYSW_04 14
+#define KEYSW_05 4
+#define KEYSW_06 18
+#define KEYSW_07 22
+#define KEYSW_08 27
+#define KEYSW_09 15
+#define KEYSW_10 17
+#define KEYSW_11 21
+#define KEYSW_12 26
+
+#define SETTINGSW 13
 #define LEDC_BASE_FREQ 12800
 #define LEDC_RESOLUTION 8
 #define LEDC_CHANNEL_R 0
@@ -38,42 +43,58 @@ int read_all_sw() {
   if(digitalRead(SETTINGSW) == LOW) {
     pushed |= (1<<0);
   }
-  if(digitalRead(KEYSW_1) == LOW) {
+  if(digitalRead(KEYSW_01) == LOW) {
     pushed |= (1<<1);
   }
-  if(digitalRead(KEYSW_2) == LOW) {
+  if(digitalRead(KEYSW_02) == LOW) {
     pushed |= (1<<2);
   }
-  if(digitalRead(KEYSW_3) == LOW) {
+  if(digitalRead(KEYSW_03) == LOW) {
     pushed |= (1<<3);
   }
-  if(digitalRead(KEYSW_4) == LOW) {
+  if(digitalRead(KEYSW_04) == LOW) {
     pushed |= (1<<4);
   }
-  if(digitalRead(KEYSW_5) == LOW) {
+  if(digitalRead(KEYSW_05) == LOW) {
     pushed |= (1<<5);
   }
-  if(digitalRead(KEYSW_6) == LOW) {
+  if(digitalRead(KEYSW_06) == LOW) {
     pushed |= (1<<6);
   }
-  if(digitalRead(KEYSW_7) == LOW) {
+  if(digitalRead(KEYSW_07) == LOW) {
     pushed |= (1<<7);
   }
-  if(digitalRead(KEYSW_8) == LOW) {
+  if(digitalRead(KEYSW_08) == LOW) {
     pushed |= (1<<8);
+  }
+  if(digitalRead(KEYSW_09) == LOW) {
+    pushed |= (1<<9);
+  }
+  if(digitalRead(KEYSW_10) == LOW) {
+    pushed |= (1<<10);
+  }
+  if(digitalRead(KEYSW_11) == LOW) {
+    pushed |= (1<<11);
+  }
+  if(digitalRead(KEYSW_12) == LOW) {
+    pushed |= (1<<12);
   }
   return pushed;
 }
 
 void setup() {
-  pinMode(KEYSW_1, INPUT_PULLUP);
-  pinMode(KEYSW_2, INPUT_PULLUP);
-  pinMode(KEYSW_3, INPUT_PULLUP);
-  pinMode(KEYSW_4, INPUT_PULLUP);
-  pinMode(KEYSW_5, INPUT_PULLUP);
-  pinMode(KEYSW_6, INPUT_PULLUP);
-  pinMode(KEYSW_7, INPUT_PULLUP);
-  pinMode(KEYSW_8, INPUT_PULLUP);
+  pinMode(KEYSW_01, INPUT_PULLUP);
+  pinMode(KEYSW_02, INPUT_PULLUP);
+  pinMode(KEYSW_03, INPUT_PULLUP);
+  pinMode(KEYSW_04, INPUT_PULLUP);
+  pinMode(KEYSW_05, INPUT_PULLUP);
+  pinMode(KEYSW_06, INPUT_PULLUP);
+  pinMode(KEYSW_07, INPUT_PULLUP);
+  pinMode(KEYSW_08, INPUT_PULLUP);
+  pinMode(KEYSW_09, INPUT_PULLUP);
+  pinMode(KEYSW_10, INPUT_PULLUP);
+  pinMode(KEYSW_11, INPUT_PULLUP);
+  pinMode(KEYSW_12, INPUT_PULLUP);
   pinMode(SETTINGSW, INPUT_PULLUP);
   pinMode(BUILTIN_LED, OUTPUT);
   digitalWrite(BUILTIN_LED, LOW);
@@ -99,56 +120,103 @@ void loop() {
     // for LED
     unsigned int sw_pushed = read_all_sw();
     unsigned int sw_pushed_xor = sw_pushed ^ sw_pushed_saved;
-    if(sw_pushed & (1<<1)) {
-      PwmLed(LEDC_CHANNEL_R);
-    }
-    if(sw_pushed & (1<<2)) {
-      PwmLed(LEDC_CHANNEL_G);
-    }
-    if(sw_pushed & (1<<3)) {
-      PwmLed(LEDC_CHANNEL_B);
-    }
+    // if(sw_pushed & (1<<1)) {
+    //   PwmLed(LEDC_CHANNEL_R);
+    // }
+    // if(sw_pushed & (1<<2)) {
+    //   PwmLed(LEDC_CHANNEL_G);
+    // }
+    // if(sw_pushed & (1<<3)) {
+    //   PwmLed(LEDC_CHANNEL_B);
+    // }
     // setting sw
     if(sw_pushed_xor & (1<<0)) {
       //
     }
     // ble
     if(bleKeyboard.isConnected()) {
-      if(sw_pushed_xor & (1<<4)) {
-        if(sw_pushed & (1<<4)) {
-          bleKeyboard.press(KEY_BACKSPACE);
+      if(sw_pushed_xor & (1<<1)) {
+        if(sw_pushed & (1<<1)) {
+          bleKeyboard.press('1');
         } else {
-          bleKeyboard.release(KEY_BACKSPACE);
+          bleKeyboard.release('1');
         }
       }
-      if(sw_pushed_xor & (1<<5)) {
-        if(sw_pushed & (1<<5)) {
+      if(sw_pushed_xor & (1<<2)) {
+        if(sw_pushed & (1<<2)) {
           bleKeyboard.press('2');
         } else {
           bleKeyboard.release('2');
         }
       }
+      if(sw_pushed_xor & (1<<3)) {
+        if(sw_pushed & (1<<3)) {
+          bleKeyboard.press('3');
+        } else {
+          bleKeyboard.release('3');
+        }
+      }
+      if(sw_pushed_xor & (1<<4)) {
+        if(sw_pushed & (1<<4)) {
+          bleKeyboard.press('4');
+        } else {
+          bleKeyboard.release('4');
+        }
+      }
+      if(sw_pushed_xor & (1<<5)) {
+        if(sw_pushed & (1<<5)) {
+          bleKeyboard.press('5');
+        } else {
+          bleKeyboard.release('5');
+        }
+      }
       if(sw_pushed_xor & (1<<6)) {
         if(sw_pushed & (1<<6)) {
-          bleKeyboard.press('\"');
+          bleKeyboard.press('6');
         } else {
-          bleKeyboard.release('\"');
+          bleKeyboard.release('6');
         }
       }
       if(sw_pushed_xor & (1<<7)) {
         if(sw_pushed & (1<<7)) {
-          bleKeyboard.press(KEY_LEFT_ALT);
-          bleKeyboard.press(KEY_TAB);
+          bleKeyboard.press('7');
         } else {
-          bleKeyboard.release(KEY_LEFT_ALT);
-          bleKeyboard.release(KEY_TAB);
+          bleKeyboard.release('7');
         }
       }
       if(sw_pushed_xor & (1<<8)) {
         if(sw_pushed & (1<<8)) {
-          bleKeyboard.press(KEY_RETURN);
+          bleKeyboard.press('8');
         } else {
-          bleKeyboard.release(KEY_RETURN);
+          bleKeyboard.release('8');
+        }
+      }
+      if(sw_pushed_xor & (1<<9)) {
+        if(sw_pushed & (1<<9)) {
+          bleKeyboard.press('9');
+        } else {
+          bleKeyboard.release('9');
+        }
+      }
+      if(sw_pushed_xor & (1<<10)) {
+        if(sw_pushed & (1<<10)) {
+          bleKeyboard.press('0');
+        } else {
+          bleKeyboard.release('0');
+        }
+      }
+      if(sw_pushed_xor & (1<<11)) {
+        if(sw_pushed & (1<<11)) {
+          bleKeyboard.press('a');
+        } else {
+          bleKeyboard.release('a');
+        }
+      }
+      if(sw_pushed_xor & (1<<12)) {
+        if(sw_pushed & (1<<12)) {
+          bleKeyboard.press('b');
+        } else {
+          bleKeyboard.release('b');
         }
       }
     }
