@@ -1,6 +1,8 @@
 #include <BleKeyboard.h>
 #include <vector>
 
+#include <EEPROM.h>
+
 #define BUILTIN_LED 2
 
 #define LEDC_BASE_FREQ 12800
@@ -9,11 +11,41 @@
 #define LEDC_CHANNEL_G 1
 #define LEDC_CHANNEL_B 2
 
-const std::vector<int> SW_PINS{13, 16, 19, 23, 14, 4, 18, 22, 27, 15, 17, 21, 26};
-std::vector<char> sw_assign_keys{KEY_ESC, '2', '1', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b'};
+using namespace std;
 
-const std::vector<int> LED_RGB_PINS{25, 32, 33};
-const std::vector<int> LED_RGB_CHANNELS{LEDC_CHANNEL_R, LEDC_CHANNEL_G, LEDC_CHANNEL_B};
+const vector<int> SW_PINS{13, 16, 19, 23, 14, 4, 18, 22, 27, 15, 17, 21, 26};
+
+const int SW_KEYS_LENGTH = 13;
+const char DEFALUT_SW_ASSIGN_KEYS[] = {KEY_ESC, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b'};
+
+const int CURRENT_VERSION = 2;
+
+struct ROM{
+  int version;
+  char sw_assign_keys[13];
+};
+
+ROM rom;
+
+// EEPROM から読み込み。保存されていない場合はデフォルト値に。
+void load_rom() {
+  EEPROM.get<ROM>(0x00, rom);
+  if(rom.version != CURRENT_VERSION) {
+    for(int i = 0; i < SW_KEYS_LENGTH; ++i) {
+      rom.sw_assign_keys[i] = DEFALUT_SW_ASSIGN_KEYS[i];
+    }
+    rom.version = CURRENT_VERSION;
+  }
+}
+
+void save_rom() {
+  rom.sw_assign_keys[12] = 'c';
+  EEPROM.put<ROM>(0x00, rom);
+  EEPROM.commit();
+}
+
+const vector<int> LED_RGB_PINS{25, 32, 33};
+const vector<int> LED_RGB_CHANNELS{LEDC_CHANNEL_R, LEDC_CHANNEL_G, LEDC_CHANNEL_B};
 
 BleKeyboard bleKeyboard("BleMacroKeyboard", "BleMacroKeyboardd_manufacturer", 100);
 
@@ -40,6 +72,11 @@ unsigned int read_all_sw() {
 }
 
 void setup() {
+  // EEPROM setup
+  EEPROM.begin(1024);
+  load_rom();
+  // save_rom();
+
   // sw pins setup
   for(int pin : SW_PINS) {
     pinMode(pin, INPUT_PULLUP);
@@ -82,9 +119,11 @@ void loop() {
     if(bleKeyboard.isConnected()) {
       for(int i = 0; i < (int)SW_PINS.size(); ++i) {
         if(sw_pushed & (1<<i)) {
-          bleKeyboard.press(sw_assign_keys[i]);
+          bleKeyboard.press(rom.sw_assign_keys[i]);
+          // bleKeyboard.press(DEFALUT_SW_ASSIGN_KEYS[i]);
         } else {
-          bleKeyboard.release(sw_assign_keys[i]);
+          bleKeyboard.release(rom.sw_assign_keys[i]);
+          // bleKeyboard.release(DEFALUT_SW_ASSIGN_KEYS[i]);
         }
       }
     }
