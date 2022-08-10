@@ -1,4 +1,3 @@
-#include <vector>
 #include <EEPROM.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
@@ -124,8 +123,9 @@ String get_html_text_input(char* name, char* value, char* label) {
   ";
 }
 
-const vector<int> LED_RGB_PINS{25, 32, 33};
-const vector<int> LED_RGB_CHANNELS{LEDC_CHANNEL_R, LEDC_CHANNEL_G, LEDC_CHANNEL_B};
+const int LED_LENGTH = 3;
+const int LED_RGB_PINS[LED_LENGTH] = {25, 32, 33};
+const int LED_RGB_CHANNELS[LED_LENGTH] = {LEDC_CHANNEL_R, LEDC_CHANNEL_G, LEDC_CHANNEL_B};
 
 BleKeyboard bleKeyboard(rom.device_name, rom.device_manufacturer, 100);
 WebServer server(80);
@@ -196,7 +196,7 @@ void setup() {
   }
 
   // LED pins setup
-  for(int i = 0; i < (int)SW_PINS.size(); ++i) {
+  for(int i = 0; i < LED_LENGTH; ++i) {
     ledcSetup(LED_RGB_CHANNELS[i], LEDC_BASE_FREQ, LEDC_RESOLUTION);
     ledcAttachPin(LED_RGB_PINS[i], LED_RGB_CHANNELS[i]);
     ledcWrite(LED_RGB_CHANNELS[i], 0);
