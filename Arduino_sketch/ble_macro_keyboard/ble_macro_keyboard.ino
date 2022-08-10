@@ -1,9 +1,10 @@
-#include <BleKeyboard.h>
 #include <vector>
 #include <EEPROM.h>
 #include <WiFi.h>
+#include <WiFiClient.h>
 #include <WebServer.h>
-#include <string>
+#include <BleKeyboard.h>
+
 
 #define LEDC_BASE_FREQ 12800
 #define LEDC_RESOLUTION 8
@@ -81,12 +82,20 @@ void load_rom() {
   }
 }
 
+void set_rom(String key, String value) {
+  if(key == "device_name") {
+    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
+      rom.device_name[i] = value[i];
+    }
+  }
+}
+
 void save_rom() {
   EEPROM.put<ROM>(0x00, rom);
   EEPROM.commit();
 }
 
-string html_head = "\
+String html_head = "\
 <!DOCTYPE html>\
 <html lang='ja'>\
   <head>\
@@ -94,17 +103,25 @@ string html_head = "\
     <title>keyboard config</title>\
   <head>\
   <body>\
-    <form>\
+    <form action=\"/save\" method=\"post\">\
 ";
 
-string html_foot = "\
+String html_foot = "\
+      <button type=\"submit\">保存</button>\
     </form>\
   </body>\
 </html>\
 ";
 
-string get_html_input(char* name, char* value) {
-  return "<input type=\"text\" name=\""+(string)name+"\" value=\""+(string)value+"\">";
+String get_html_text_input(char* name, char* value, char* label) {
+  return "\
+    <div>\
+      <label>\
+        "+(String)label+"\
+        <input type=\"text\" name=\""+(String)name+"\" value=\""+(String)value+"\">\
+      </label>\
+    </div>\
+  ";
 }
 
 const vector<int> LED_RGB_PINS{25, 32, 33};
@@ -140,8 +157,18 @@ void setup_blekeyboard() {
 }
 
 void handleRoot() {
-  string html = html_head+get_html_input("device_name", rom.device_name)+html_foot;
-  server.send(200, "text/html", html.c_str());
+  String html = html_head+get_html_text_input("device_name", rom.device_name, "デバイス名")+html_foot;
+  server.send(200, "text/html", html);
+}
+
+void handleSave() {
+  String msg = "";
+  for(int i = 0; i < server.args(); ++i) {
+    msg += server.argName(i) + " : " + server.arg(i) + "\n";
+    set_rom(server.argName(i), server.arg(i));
+  }
+  save_rom();
+  server.send(200, "text/plain", msg);
 }
 
 void handleNotFound() {
@@ -154,6 +181,7 @@ void setup_config_server() {
   delay(100);
   WiFi.softAPConfig(static_ip, static_ip, subnet);
   server.on("/", handleRoot);
+  server.on("/save", handleSave);
   server.onNotFound(handleNotFound);
   server.begin();
 }
@@ -190,7 +218,6 @@ void setup() {
 void loop() {
   if(is_config) {
     server.handleClient();
-    
   } else {
     // static variable defind.
     static unsigned int sw_pushed = 0;
