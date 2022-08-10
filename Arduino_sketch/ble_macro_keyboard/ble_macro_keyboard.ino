@@ -3,6 +3,7 @@
 #include <EEPROM.h>
 #include <WiFi.h>
 #include <WebServer.h>
+#include <string>
 
 #define LEDC_BASE_FREQ 12800
 #define LEDC_RESOLUTION 8
@@ -85,6 +86,27 @@ void save_rom() {
   EEPROM.commit();
 }
 
+string html_head = "\
+<!DOCTYPE html>\
+<html lang='ja'>\
+  <head>\
+    <meta charset='UTF-8'>\
+    <title>keyboard config</title>\
+  <head>\
+  <body>\
+    <form>\
+";
+
+string html_foot = "\
+    </form>\
+  </body>\
+</html>\
+";
+
+string get_html_input(char* name, char* value) {
+  return "<input type=\"text\" name=\""+(string)name+"\" value=\""+(string)value+"\">";
+}
+
 const vector<int> LED_RGB_PINS{25, 32, 33};
 const vector<int> LED_RGB_CHANNELS{LEDC_CHANNEL_R, LEDC_CHANNEL_G, LEDC_CHANNEL_B};
 
@@ -118,7 +140,8 @@ void setup_blekeyboard() {
 }
 
 void handleRoot() {
-  server.send(200, "text/plain", "hello from esp32!");
+  string html = html_head+get_html_input("device_name", rom.device_name)+html_foot;
+  server.send(200, "text/html", html.c_str());
 }
 
 void handleNotFound() {
