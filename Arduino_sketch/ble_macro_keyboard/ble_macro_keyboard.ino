@@ -3,8 +3,6 @@
 
 #include <EEPROM.h>
 
-#define BUILTIN_LED 2
-
 #define LEDC_BASE_FREQ 12800
 #define LEDC_RESOLUTION 8
 #define LEDC_CHANNEL_R 0
@@ -18,13 +16,16 @@ const vector<int> SW_PINS{16, 19, 23, 14, 4, 18, 22, 27, 15, 17, 21, 26};
 
 const int KEYMAPS_ROW_LENGTH = 4;
 const int KEYMAPS_COLUMN_LENGTH = 12;
-const int DEFAULT_LAYERS_SWITCH[] = {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2};
+const int DEFAULT_LAYERS_SWITCH[] = {0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1};
 const char DEFAULT_KEYMAPS[KEYMAPS_ROW_LENGTH][KEYMAPS_COLUMN_LENGTH] = {
-  {'1', '2', '3', '4', '5', '6', '7', '\0', '9', '0', 'a', '\0'},
-  {'d', 'e', 'f', 'g', 'h', 'i', 'j', '\0', 'l', 'm', 'n', '\0'},
-  {'x', 'e', 'f', 'g', 'h', 'i', 'j', '\0', 'l', 'm', 'n', '\0'},
-  {'y', 'e', 'f', 'g', 'h', 'i', 'j', '\0', 'l', 'm', 'n', '\0'}
+  {'1', '2', '3', '0', '4', '5', '6', '\0', '7', '8', '9', '\0'},
+  {'+', '-', '*', '/', '%', '(', ')', '\0', KEY_LEFT_ARROW, KEY_RIGHT_ARROW, KEY_BACKSPACE, '\0'},
+  {KEY_F1, KEY_F2, KEY_F3, KEY_F10, KEY_F4, KEY_F5, KEY_F6, '\0', KEY_F7, KEY_F8, KEY_F9, '\0'},
+  {KEY_F11, KEY_F12, KEY_F13, KEY_F20, KEY_F14, KEY_F15, KEY_F16, '\0', KEY_F17, KEY_F18, KEY_F19, '\0'}
 };
+
+const char* DEFAULT_SSID = "Keyboard_config";
+const char* DEFAULT_PASSWORD = "password";
 
 const int CURRENT_VERSION = 2;
 
@@ -84,20 +85,22 @@ unsigned int read_all_sw() {
   return pushed;
 }
 
+void setup_blekeyboard() {
+  bleKeyboard.begin();
+}
+
+void setup_config_server() {
+  
+}
+
 void setup() {
-  // EEPROM setup
-  EEPROM.begin(1024);
-  load_rom();
-  // save_rom();
+  // setting_sw pins setup
+  pinMode(SETTING_SW_PIN, INPUT_PULLUP);
 
   // sw pins setup
   for(int pin : SW_PINS) {
     pinMode(pin, INPUT_PULLUP);
   }
-
-  // Builtin LED setup
-  pinMode(BUILTIN_LED, OUTPUT);
-  digitalWrite(BUILTIN_LED, HIGH);
 
   // LED pins setup
   for(int i = 0; i < (int)SW_PINS.size(); ++i) {
@@ -105,7 +108,19 @@ void setup() {
     ledcAttachPin(LED_RGB_PINS[i], LED_RGB_CHANNELS[i]);
     ledcWrite(LED_RGB_CHANNELS[i], 0);
   }
-  bleKeyboard.begin();
+
+  // EEPROM setup
+  EEPROM.begin(1024);
+  load_rom();
+
+  if(digitalRead(SETTING_SW_PIN) == LOW) {
+    setup_config_server();
+  } else {
+    setup_blekeyboard();
+  }
+
+  
+  
 }
 
 void loop() {
@@ -114,8 +129,7 @@ void loop() {
   static int keymap_layer = 0;
   // measures for chattering.
   if(sw_pushed != read_all_sw()) {
-    digitalWrite(BUILTIN_LED, HIGH);
-    delay(5);
+    delay(10);
 
     unsigned int cur_sw_pushed = read_all_sw();
     unsigned int xor_sw_pushed = cur_sw_pushed ^ sw_pushed;
@@ -138,12 +152,8 @@ void loop() {
         }
       }
       if(keymap_layer != cur_keymap_layer) {
+        bleKeyboard.releaseAll();
         for(int i = 0; i < KEYMAPS_COLUMN_LENGTH; ++i) {
-          if(rom.keymaps[keymap_layer][i] != '\0') {
-            if(sw_pushed & (1<<i)) {
-              bleKeyboard.release(rom.keymaps[keymap_layer][i]);
-            }
-          }
           if(rom.keymaps[cur_keymap_layer][i] != '\0') {
             if(cur_sw_pushed & (1<<i)) {
               bleKeyboard.press(rom.keymaps[cur_keymap_layer][i]);
@@ -168,6 +178,5 @@ void loop() {
       
     }
     sw_pushed = cur_sw_pushed;
-    digitalWrite(BUILTIN_LED, LOW);
   }
 }
