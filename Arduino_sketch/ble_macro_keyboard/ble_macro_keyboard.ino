@@ -15,14 +15,21 @@ using namespace std;
 
 const vector<int> SW_PINS{13, 16, 19, 23, 14, 4, 18, 22, 27, 15, 17, 21, 26};
 
-const int SW_KEYS_LENGTH = 13;
-const char DEFALUT_SW_ASSIGN_KEYS[] = {KEY_ESC, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b'};
+const int KEY_MAPS_ROW_LENGTH = 4;
+const int KEY_MAPS_COLUMN_LENGTH = 13;
+const int DEFAULT_LAYERS_SWITCH[] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2};
+const char DEFAULT_KEYMAPS[KEY_MAPS_ROW_LENGTH][KEY_MAPS_COLUMN_LENGTH] = {
+  {'', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b'},
+  {'', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'},
+  {'', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'},
+  {'', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'}
+};
 
 const int CURRENT_VERSION = 2;
 
 struct ROM{
   int version;
-  char sw_assign_keys[13];
+  char keymaps[2][13];
 };
 
 ROM rom;
@@ -31,15 +38,17 @@ ROM rom;
 void load_rom() {
   EEPROM.get<ROM>(0x00, rom);
   if(rom.version != CURRENT_VERSION) {
-    for(int i = 0; i < SW_KEYS_LENGTH; ++i) {
-      rom.sw_assign_keys[i] = DEFALUT_SW_ASSIGN_KEYS[i];
+    for(int i = 0; i < KEY_MAPS_ROW_LENGTH; ++i) {
+      for(int j = 0; j < KEY_MAPS_COLUMN_LENGTH; ++j) {
+        rom.keymaps[i][j] = DEFAULT_KEYMAPS[i][j];
+      }
     }
+    
     rom.version = CURRENT_VERSION;
   }
 }
 
 void save_rom() {
-  rom.sw_assign_keys[12] = 'c';
   EEPROM.put<ROM>(0x00, rom);
   EEPROM.commit();
 }
@@ -117,13 +126,15 @@ void loop() {
     // }
     // ble
     if(bleKeyboard.isConnected()) {
+      int keymaps_row_index = 0;
+
       for(int i = 0; i < (int)SW_PINS.size(); ++i) {
         if(sw_pushed & (1<<i)) {
-          bleKeyboard.press(rom.sw_assign_keys[i]);
-          // bleKeyboard.press(DEFALUT_SW_ASSIGN_KEYS[i]);
+          bleKeyboard.press(rom.keymaps[0][i]);
+          // bleKeyboard.press(DEFAULT_KEYMAPS[i]);
         } else {
-          bleKeyboard.release(rom.sw_assign_keys[i]);
-          // bleKeyboard.release(DEFALUT_SW_ASSIGN_KEYS[i]);
+          bleKeyboard.release(rom.keymaps[0][i]);
+          // bleKeyboard.release(DEFAULT_KEYMAPS[i]);
         }
       }
     }
