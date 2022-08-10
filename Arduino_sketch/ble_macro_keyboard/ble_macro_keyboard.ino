@@ -16,21 +16,22 @@ using namespace std;
 const int SETTING_SW_PIN = 13;
 const vector<int> SW_PINS{16, 19, 23, 14, 4, 18, 22, 27, 15, 17, 21, 26};
 
-const int KEY_MAPS_ROW_LENGTH = 4;
-const int KEY_MAPS_COLUMN_LENGTH = 12;
+const int KEYMAPS_ROW_LENGTH = 4;
+const int KEYMAPS_COLUMN_LENGTH = 12;
 const int DEFAULT_LAYERS_SWITCH[] = {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2};
-const char DEFAULT_KEYMAPS[KEY_MAPS_ROW_LENGTH][KEY_MAPS_COLUMN_LENGTH] = {
-  {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b'},
-  {'d', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'},
-  {'d', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'},
-  {'d', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'}
+const char DEFAULT_KEYMAPS[KEYMAPS_ROW_LENGTH][KEYMAPS_COLUMN_LENGTH] = {
+  {'1', '2', '3', '4', '5', '6', '7', '\0', '9', '0', 'a', '\0'},
+  {'d', 'e', 'f', 'g', 'h', 'i', 'j', '\0', 'l', 'm', 'n', '\0'},
+  {'x', 'e', 'f', 'g', 'h', 'i', 'j', '\0', 'l', 'm', 'n', '\0'},
+  {'y', 'e', 'f', 'g', 'h', 'i', 'j', '\0', 'l', 'm', 'n', '\0'}
 };
 
 const int CURRENT_VERSION = 2;
 
 struct ROM{
   int version;
-  char keymaps[KEY_MAPS_ROW_LENGTH][KEY_MAPS_COLUMN_LENGTH];
+  int layers_switch[KEYMAPS_COLUMN_LENGTH];
+  char keymaps[KEYMAPS_ROW_LENGTH][KEYMAPS_COLUMN_LENGTH];
 };
 
 ROM rom;
@@ -39,12 +40,14 @@ ROM rom;
 void load_rom() {
   EEPROM.get<ROM>(0x00, rom);
   if(rom.version != CURRENT_VERSION) {
-    for(int i = 0; i < KEY_MAPS_ROW_LENGTH; ++i) {
-      for(int j = 0; j < KEY_MAPS_COLUMN_LENGTH; ++j) {
+    for(int i = 0; i < KEYMAPS_ROW_LENGTH; ++i) {
+      for(int j = 0; j < KEYMAPS_COLUMN_LENGTH; ++j) {
         rom.keymaps[i][j] = DEFAULT_KEYMAPS[i][j];
       }
     }
-    
+    for(int i = 0; i < KEYMAPS_COLUMN_LENGTH; ++i) {
+      rom.layers_switch[i] = DEFAULT_LAYERS_SWITCH[i];
+    }
     rom.version = CURRENT_VERSION;
   }
 }
@@ -107,38 +110,64 @@ void setup() {
 
 void loop() {
   // static variable defind.
-  static unsigned int sw_pushed_saved = 0;
+  static unsigned int sw_pushed = 0;
+  static int keymap_layer = 0;
   // measures for chattering.
-  if(sw_pushed_saved != read_all_sw()) {
+  if(sw_pushed != read_all_sw()) {
     digitalWrite(BUILTIN_LED, HIGH);
     delay(5);
 
-    unsigned int sw_pushed = read_all_sw();
-    unsigned int sw_pushed_xor = sw_pushed ^ sw_pushed_saved;
+    unsigned int cur_sw_pushed = read_all_sw();
+    unsigned int xor_sw_pushed = cur_sw_pushed ^ sw_pushed;
     // for LED
-    // if(sw_pushed & (1<<1)) {
+    // if(cur_sw_pushed & (1<<1)) {
     //   PwmLed(LEDC_CHANNEL_R);
     // }
-    // if(sw_pushed & (1<<2)) {
+    // if(cur_sw_pushed & (1<<2)) {
     //   PwmLed(LEDC_CHANNEL_G);
     // }
-    // if(sw_pushed & (1<<3)) {
+    // if(cur_sw_pushed & (1<<3)) {
     //   PwmLed(LEDC_CHANNEL_B);
     // }
     // ble
     if(bleKeyboard.isConnected()) {
-      int keymaps_row_index = 0;
-      for(int i = 0; i < (int)SW_PINS.size(); ++i) {
-        if(sw_pushed & (1<<i)) {
-          bleKeyboard.press(rom.keymaps[0][i]);
-          // bleKeyboard.press(DEFAULT_KEYMAPS[i]);
-        } else {
-          bleKeyboard.release(rom.keymaps[0][i]);
-          // bleKeyboard.release(DEFAULT_KEYMAPS[i]);
+      int cur_keymap_layer = 0;
+      for(int i = 0; i < KEYMAPS_COLUMN_LENGTH; ++i) {
+        if(cur_sw_pushed & (1<<i)) {
+          cur_keymap_layer += rom.layers_switch[i];
         }
       }
+      if(keymap_layer != cur_keymap_layer) {
+        for(int i = 0; i < KEYMAPS_COLUMN_LENGTH; ++i) {
+          if(rom.keymaps[keymap_layer][i] != '\0') {
+            if(sw_pushed & (1<<i)) {
+              bleKeyboard.release(rom.keymaps[keymap_layer][i]);
+            }
+          }
+          if(rom.keymaps[cur_keymap_layer][i] != '\0') {
+            if(cur_sw_pushed & (1<<i)) {
+              bleKeyboard.press(rom.keymaps[cur_keymap_layer][i]);
+            }
+          }
+        }
+        keymap_layer = cur_keymap_layer;
+      } else {
+        for(int i = 0; i < (int)SW_PINS.size(); ++i) {
+          if(rom.keymaps[keymap_layer][i] == '\0') {
+            continue;
+          }
+          if(xor_sw_pushed & (1<<i)) {
+            if(cur_sw_pushed & (1<<i)) {
+              bleKeyboard.press(rom.keymaps[keymap_layer][i]);
+            } else {
+              bleKeyboard.release(rom.keymaps[keymap_layer][i]);
+            }
+          }
+        }
+      }
+      
     }
-    sw_pushed_saved = sw_pushed;
+    sw_pushed = cur_sw_pushed;
     digitalWrite(BUILTIN_LED, LOW);
   }
 }
