@@ -14,6 +14,9 @@ using namespace std;
 const int SETTING_SW_PIN = 13;
 const vector<int> SW_PINS{16, 19, 23, 14, 4, 18, 22, 27, 15, 17, 21, 26};
 
+const IPAddress static_ip(192, 168, 4, 1);
+const IPAddress subnet(255, 255, 255, 0);
+
 const int KEYMAPS_ROW_LENGTH = 4;
 const int KEYMAPS_COLUMN_LENGTH = 12;
 const int DEFAULT_LAYERS_SWITCH[] = {0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1};
@@ -95,6 +98,8 @@ void setup_blekeyboard() {
 void setup_config_server() {
   is_config = true;
   WiFi.softAP(DEFAULT_SSID, DEFAULT_PASSWORD);
+  delay(100);
+  WiFi.softAPConfig(static_ip, static_ip, subnet);
   server.begin();
 }
 
@@ -113,10 +118,12 @@ void setup() {
     ledcAttachPin(LED_RGB_PINS[i], LED_RGB_CHANNELS[i]);
     ledcWrite(LED_RGB_CHANNELS[i], 0);
   }
+  delay(10);
 
   // EEPROM setup
   EEPROM.begin(1024);
   load_rom();
+  delay(10);
 
   if(digitalRead(SETTING_SW_PIN) == LOW) {
     setup_config_server();
