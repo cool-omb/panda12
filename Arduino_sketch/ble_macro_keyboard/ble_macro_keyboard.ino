@@ -2,6 +2,7 @@
 #include <vector>
 #include <EEPROM.h>
 #include <WiFi.h>
+#include <WebServer.h>
 
 #define LEDC_BASE_FREQ 12800
 #define LEDC_RESOLUTION 8
@@ -27,6 +28,11 @@ const char DEFAULT_KEYMAPS[KEYMAPS_ROW_LENGTH][KEYMAPS_COLUMN_LENGTH] = {
   {KEY_F11, KEY_F12, KEY_F13, KEY_F20, KEY_F14, KEY_F15, KEY_F16, '\0', KEY_F17, KEY_F18, KEY_F19, '\0'}
 };
 
+const int CHAR_ARRAY_LENGTH = 64;
+const int SSID_LENGTH = 32;
+const char* DEFAULT_DEVICE_NAME = "keyboard_panda12";
+const char* DEFAULT_DEVICE_MANUFACTURER = "panda12_manufacturer";
+
 const char* DEFAULT_SSID = "Keyboard_config";
 const char* DEFAULT_PASSWORD = "password";
 
@@ -36,6 +42,10 @@ bool is_config = false;
 
 struct ROM{
   int version;
+  char device_name[CHAR_ARRAY_LENGTH];
+  char device_manufacturer[CHAR_ARRAY_LENGTH];
+  char ssid[SSID_LENGTH];
+  char password[CHAR_ARRAY_LENGTH];
   int layers_switch[KEYMAPS_COLUMN_LENGTH];
   char keymaps[KEYMAPS_ROW_LENGTH][KEYMAPS_COLUMN_LENGTH];
 };
@@ -46,6 +56,18 @@ ROM rom;
 void load_rom() {
   EEPROM.get<ROM>(0x00, rom);
   if(rom.version != CURRENT_VERSION) {
+    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
+      rom.device_name[i] = DEFAULT_DEVICE_NAME[i];
+    }
+    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
+      rom.device_manufacturer[i] = DEFAULT_DEVICE_MANUFACTURER[i];
+    }
+    for(int i = 0; i < SSID_LENGTH; ++i) {
+      rom.ssid[i] = DEFAULT_SSID[i];
+    }
+    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
+      rom.password[i] = DEFAULT_PASSWORD[i];
+    }
     for(int i = 0; i < KEYMAPS_ROW_LENGTH; ++i) {
       for(int j = 0; j < KEYMAPS_COLUMN_LENGTH; ++j) {
         rom.keymaps[i][j] = DEFAULT_KEYMAPS[i][j];
@@ -66,8 +88,8 @@ void save_rom() {
 const vector<int> LED_RGB_PINS{25, 32, 33};
 const vector<int> LED_RGB_CHANNELS{LEDC_CHANNEL_R, LEDC_CHANNEL_G, LEDC_CHANNEL_B};
 
-BleKeyboard bleKeyboard("BleMacroKeyboard", "BleMacroKeyboardd_manufacturer", 100);
-WiFiServer server(80);
+BleKeyboard bleKeyboard(rom.device_name, rom.device_manufacturer, 100);
+WebServer server(80);
 
 void PwmLed(int channel) {
   static uint8_t brightness[3] = {0, 0, 0};
@@ -95,11 +117,21 @@ void setup_blekeyboard() {
   bleKeyboard.begin();
 }
 
+void handleRoot() {
+  server.send(200, "text/plain", "hello from esp32!");
+}
+
+void handleNotFound() {
+  server.send(404, "text/plain", "File Not Found.\n\nlink to\n192.168.4.1\n");
+}
+
 void setup_config_server() {
   is_config = true;
-  WiFi.softAP(DEFAULT_SSID, DEFAULT_PASSWORD);
+  WiFi.softAP(rom.ssid, rom.password);
   delay(100);
   WiFi.softAPConfig(static_ip, static_ip, subnet);
+  server.on("/", handleRoot);
+  server.onNotFound(handleNotFound);
   server.begin();
 }
 
@@ -134,43 +166,8 @@ void setup() {
 
 void loop() {
   if(is_config) {
-    WiFiClient client = server.available();
-    if (client) {                             // if you get a client,
-      String currentLine = "";                // make a String to hold incoming data from the client
-      while (client.connected()) {            // loop while the client's connected
-        if (client.available()) {             // if there's bytes to read from the client,
-          char c = client.read();             // read a byte, then
-          Serial.write(c);                    // print it out the serial monitor
-          if (c == '\n') {                    // if the byte is a newline character
-
-            // if the current line is blank, you got two newline characters in a row.
-            // that's the end of the client HTTP request, so send a response:
-            if (currentLine.length() == 0) {
-              // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
-              // and a content-type so the client knows what's coming, then a blank line:
-              client.println("HTTP/1.1 200 OK");
-              client.println("Content-type:text/html");
-              client.println();
-
-              // the content of the HTTP response follows the header:
-              client.print("Click <a href=\"/H\">here</a> to turn the LED on pin 5 on.<br>");
-              client.print("Click <a href=\"/L\">here</a> to turn the LED on pin 5 off.<br>");
-
-              // The HTTP response ends with another blank line:
-              client.println();
-              // break out of the while loop:
-              break;
-            } else {    // if you got a newline, then clear currentLine:
-              currentLine = "";
-            }
-          } else if (c != '\r') {  // if you got anything else but a carriage return character,
-            currentLine += c;      // add it to the end of the currentLine
-          }
-        }
-      }
-      // close the connection:
-      client.stop();
-    }
+    server.handleClient();
+    
   } else {
     // static variable defind.
     static unsigned int sw_pushed = 0;
