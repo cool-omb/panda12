@@ -1,7 +1,7 @@
 #include <BleKeyboard.h>
 #include <vector>
-
 #include <EEPROM.h>
+#include <WiFi.h>
 
 #define LEDC_BASE_FREQ 12800
 #define LEDC_RESOLUTION 8
@@ -28,6 +28,8 @@ const char* DEFAULT_SSID = "Keyboard_config";
 const char* DEFAULT_PASSWORD = "password";
 
 const int CURRENT_VERSION = 2;
+
+bool is_config = false;
 
 struct ROM{
   int version;
@@ -62,6 +64,7 @@ const vector<int> LED_RGB_PINS{25, 32, 33};
 const vector<int> LED_RGB_CHANNELS{LEDC_CHANNEL_R, LEDC_CHANNEL_G, LEDC_CHANNEL_B};
 
 BleKeyboard bleKeyboard("BleMacroKeyboard", "BleMacroKeyboardd_manufacturer", 100);
+WiFiServer server(80);
 
 void PwmLed(int channel) {
   static uint8_t brightness[3] = {0, 0, 0};
@@ -90,7 +93,9 @@ void setup_blekeyboard() {
 }
 
 void setup_config_server() {
-  
+  is_config = true;
+  WiFi.softAP(DEFAULT_SSID, DEFAULT_PASSWORD);
+  server.begin();
 }
 
 void setup() {
@@ -118,65 +123,102 @@ void setup() {
   } else {
     setup_blekeyboard();
   }
-
-  
-  
 }
 
 void loop() {
-  // static variable defind.
-  static unsigned int sw_pushed = 0;
-  static int keymap_layer = 0;
-  // measures for chattering.
-  if(sw_pushed != read_all_sw()) {
-    delay(10);
+  if(is_config) {
+    WiFiClient client = server.available();
+    if (client) {                             // if you get a client,
+      String currentLine = "";                // make a String to hold incoming data from the client
+      while (client.connected()) {            // loop while the client's connected
+        if (client.available()) {             // if there's bytes to read from the client,
+          char c = client.read();             // read a byte, then
+          Serial.write(c);                    // print it out the serial monitor
+          if (c == '\n') {                    // if the byte is a newline character
 
-    unsigned int cur_sw_pushed = read_all_sw();
-    unsigned int xor_sw_pushed = cur_sw_pushed ^ sw_pushed;
-    // for LED
-    // if(cur_sw_pushed & (1<<1)) {
-    //   PwmLed(LEDC_CHANNEL_R);
-    // }
-    // if(cur_sw_pushed & (1<<2)) {
-    //   PwmLed(LEDC_CHANNEL_G);
-    // }
-    // if(cur_sw_pushed & (1<<3)) {
-    //   PwmLed(LEDC_CHANNEL_B);
-    // }
-    // ble
-    if(bleKeyboard.isConnected()) {
-      int cur_keymap_layer = 0;
-      for(int i = 0; i < KEYMAPS_COLUMN_LENGTH; ++i) {
-        if(cur_sw_pushed & (1<<i)) {
-          cur_keymap_layer += rom.layers_switch[i];
-        }
-      }
-      if(keymap_layer != cur_keymap_layer) {
-        bleKeyboard.releaseAll();
-        for(int i = 0; i < KEYMAPS_COLUMN_LENGTH; ++i) {
-          if(rom.keymaps[cur_keymap_layer][i] != '\0') {
-            if(cur_sw_pushed & (1<<i)) {
-              bleKeyboard.press(rom.keymaps[cur_keymap_layer][i]);
+            // if the current line is blank, you got two newline characters in a row.
+            // that's the end of the client HTTP request, so send a response:
+            if (currentLine.length() == 0) {
+              // HTTP headers always start with a response code (e.g. HTTP/1.1 200 OK)
+              // and a content-type so the client knows what's coming, then a blank line:
+              client.println("HTTP/1.1 200 OK");
+              client.println("Content-type:text/html");
+              client.println();
+
+              // the content of the HTTP response follows the header:
+              client.print("Click <a href=\"/H\">here</a> to turn the LED on pin 5 on.<br>");
+              client.print("Click <a href=\"/L\">here</a> to turn the LED on pin 5 off.<br>");
+
+              // The HTTP response ends with another blank line:
+              client.println();
+              // break out of the while loop:
+              break;
+            } else {    // if you got a newline, then clear currentLine:
+              currentLine = "";
             }
-          }
-        }
-        keymap_layer = cur_keymap_layer;
-      } else {
-        for(int i = 0; i < (int)SW_PINS.size(); ++i) {
-          if(rom.keymaps[keymap_layer][i] == '\0') {
-            continue;
-          }
-          if(xor_sw_pushed & (1<<i)) {
-            if(cur_sw_pushed & (1<<i)) {
-              bleKeyboard.press(rom.keymaps[keymap_layer][i]);
-            } else {
-              bleKeyboard.release(rom.keymaps[keymap_layer][i]);
-            }
+          } else if (c != '\r') {  // if you got anything else but a carriage return character,
+            currentLine += c;      // add it to the end of the currentLine
           }
         }
       }
-      
+      // close the connection:
+      client.stop();
     }
-    sw_pushed = cur_sw_pushed;
+  } else {
+    // static variable defind.
+    static unsigned int sw_pushed = 0;
+    static int keymap_layer = 0;
+    // measures for chattering.
+    if(sw_pushed != read_all_sw()) {
+      delay(10);
+
+      unsigned int cur_sw_pushed = read_all_sw();
+      unsigned int xor_sw_pushed = cur_sw_pushed ^ sw_pushed;
+      // for LED
+      // if(cur_sw_pushed & (1<<1)) {
+      //   PwmLed(LEDC_CHANNEL_R);
+      // }
+      // if(cur_sw_pushed & (1<<2)) {
+      //   PwmLed(LEDC_CHANNEL_G);
+      // }
+      // if(cur_sw_pushed & (1<<3)) {
+      //   PwmLed(LEDC_CHANNEL_B);
+      // }
+      // ble
+      if(bleKeyboard.isConnected()) {
+        int cur_keymap_layer = 0;
+        for(int i = 0; i < KEYMAPS_COLUMN_LENGTH; ++i) {
+          if(cur_sw_pushed & (1<<i)) {
+            cur_keymap_layer += rom.layers_switch[i];
+          }
+        }
+        if(keymap_layer != cur_keymap_layer) {
+          bleKeyboard.releaseAll();
+          for(int i = 0; i < KEYMAPS_COLUMN_LENGTH; ++i) {
+            if(rom.keymaps[cur_keymap_layer][i] != '\0') {
+              if(cur_sw_pushed & (1<<i)) {
+                bleKeyboard.press(rom.keymaps[cur_keymap_layer][i]);
+              }
+            }
+          }
+          keymap_layer = cur_keymap_layer;
+        } else {
+          for(int i = 0; i < (int)SW_PINS.size(); ++i) {
+            if(rom.keymaps[keymap_layer][i] == '\0') {
+              continue;
+            }
+            if(xor_sw_pushed & (1<<i)) {
+              if(cur_sw_pushed & (1<<i)) {
+                bleKeyboard.press(rom.keymaps[keymap_layer][i]);
+              } else {
+                bleKeyboard.release(rom.keymaps[keymap_layer][i]);
+              }
+            }
+          }
+        }
+        
+      }
+      sw_pushed = cur_sw_pushed;
+    }
   }
 }
