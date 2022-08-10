@@ -13,23 +13,24 @@
 
 using namespace std;
 
-const vector<int> SW_PINS{13, 16, 19, 23, 14, 4, 18, 22, 27, 15, 17, 21, 26};
+const int SETTING_SW_PIN = 13;
+const vector<int> SW_PINS{16, 19, 23, 14, 4, 18, 22, 27, 15, 17, 21, 26};
 
 const int KEY_MAPS_ROW_LENGTH = 4;
-const int KEY_MAPS_COLUMN_LENGTH = 13;
-const int DEFAULT_LAYERS_SWITCH[] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2};
+const int KEY_MAPS_COLUMN_LENGTH = 12;
+const int DEFAULT_LAYERS_SWITCH[] = {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2};
 const char DEFAULT_KEYMAPS[KEY_MAPS_ROW_LENGTH][KEY_MAPS_COLUMN_LENGTH] = {
-  {'', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b'},
-  {'', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'},
-  {'', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'},
-  {'', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'}
+  {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b'},
+  {'d', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'},
+  {'d', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'},
+  {'d', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o'}
 };
 
 const int CURRENT_VERSION = 2;
 
 struct ROM{
   int version;
-  char keymaps[2][13];
+  char keymaps[KEY_MAPS_ROW_LENGTH][KEY_MAPS_COLUMN_LENGTH];
 };
 
 ROM rom;
@@ -127,7 +128,6 @@ void loop() {
     // ble
     if(bleKeyboard.isConnected()) {
       int keymaps_row_index = 0;
-
       for(int i = 0; i < (int)SW_PINS.size(); ++i) {
         if(sw_pushed & (1<<i)) {
           bleKeyboard.press(rom.keymaps[0][i]);
