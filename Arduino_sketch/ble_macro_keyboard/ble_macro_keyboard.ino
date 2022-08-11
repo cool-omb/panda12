@@ -86,10 +86,30 @@ void load_rom() {
 }
 
 void set_rom(String key, String value) {
-  if(key == "device_name") {
-    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
-      rom.device_name[i] = value[i];
-    }
+  switch(key) {
+    case "device_name":
+      for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
+        rom.device_name[i] = value[i];
+      }
+      break;
+    case "device_manufacturer":
+      for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
+        rom.device_manufacturer[i] = value[i];
+      }
+      break;
+    case "ssid":
+      for(int i = 0; i < SSID_LENGTH; ++i) {
+        rom.ssid[i] = value[i];
+      }
+      break;
+    case "password":
+      for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
+        rom.password[i] = value[i];
+      }
+      break;
+    case "delay_time":
+      rom.delay_time = value;
+      break;
   }
 }
 
