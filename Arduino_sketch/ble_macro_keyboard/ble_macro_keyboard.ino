@@ -37,7 +37,9 @@ const char* DEFAULT_DEVICE_MANUFACTURER = "panda12_manufacturer";
 const char* DEFAULT_SSID = "Keyboard_config";
 const char* DEFAULT_PASSWORD = "password";
 
-const int CURRENT_VERSION = 2;
+const int DEFAULT_DELAY_TIME = 100;
+
+const int CURRENT_VERSION = 1;
 
 bool is_config = false;
 
@@ -47,6 +49,7 @@ struct ROM{
   char device_manufacturer[CHAR_ARRAY_LENGTH];
   char ssid[SSID_LENGTH];
   char password[CHAR_ARRAY_LENGTH];
+  int delay_time;
   int layers_switch[KEYMAPS_COLUMN_LENGTH];
   char keymaps[KEYMAPS_ROW_LENGTH][KEYMAPS_COLUMN_LENGTH];
 };
@@ -69,6 +72,7 @@ void load_rom() {
     for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
       rom.password[i] = DEFAULT_PASSWORD[i];
     }
+    rom.delay_time = DEFAULT_DELAY_TIME;
     for(int i = 0; i < KEYMAPS_ROW_LENGTH; ++i) {
       for(int j = 0; j < KEYMAPS_COLUMN_LENGTH; ++j) {
         rom.keymaps[i][j] = DEFAULT_KEYMAPS[i][j];
@@ -274,5 +278,6 @@ void loop() {
       }
       sw_pushed = cur_sw_pushed;
     }
+    delay(rom.delay_time);
   }
 }
