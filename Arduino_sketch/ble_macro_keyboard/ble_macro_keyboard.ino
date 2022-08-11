@@ -13,6 +13,8 @@
 
 using namespace std;
 
+
+
 const int SETTING_SW_PIN = 13;
 const vector<int> SW_PINS{16, 19, 23, 14, 4, 18, 22, 27, 15, 17, 21, 26};
 
@@ -181,7 +183,13 @@ void setup_blekeyboard() {
 }
 
 void handleRoot() {
-  String html = html_head+get_html_text_input("device_name", rom.device_name, "デバイス名")+html_foot;
+  String html = html_head
+    +get_html_text_input("device_name", rom.device_name, "デバイス名")
+    +get_html_text_input("device_manufacturer", rom.device_manufacturer, "所持者")
+    +get_html_text_input("ssid", rom.ssid, "SSID")
+    +get_html_text_input("password", rom.password, "パスワード")
+    +get_html_text_input("delay_time", rom.delay_time, "待機時間")
+    +html_foot;
   server.send(200, "text/html", html);
 }
 
