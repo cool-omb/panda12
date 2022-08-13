@@ -39,9 +39,15 @@ const char* DEFAULT_DEVICE_MANUFACTURER = "panda12_manufacturer";
 const char* DEFAULT_SSID = "Keyboard_config";
 const char* DEFAULT_PASSWORD = "password";
 
-const int DEFAULT_DELAY_TIME = 100;
+const int DEFAULT_DELAY_TIME = 25;
 
-const int CURRENT_VERSION = 1;
+const int LED_LENGTH = 3;
+const int LED_RGB_PINS[LED_LENGTH] = {25, 32, 33};
+const int LED_RGB_CHANNELS[LED_LENGTH] = {LEDC_CHANNEL_R, LEDC_CHANNEL_G, LEDC_CHANNEL_B};
+
+const int DEFAULT_LED_BRIGHTNESS[LED_LENGTH] = {0, 0, 0};
+
+const int CURRENT_VERSION = 11;
 
 bool is_config = false;
 
@@ -54,6 +60,7 @@ struct ROM{
   int delay_time;
   int layers_switch[KEYMAPS_COLUMN_LENGTH];
   char keymaps[KEYMAPS_ROW_LENGTH][KEYMAPS_COLUMN_LENGTH];
+  int led_brightness[LED_LENGTH];
 };
 
 ROM rom;
@@ -83,35 +90,38 @@ void load_rom() {
     for(int i = 0; i < KEYMAPS_COLUMN_LENGTH; ++i) {
       rom.layers_switch[i] = DEFAULT_LAYERS_SWITCH[i];
     }
+    for(int i = 0; i < LED_LENGTH; ++i) {
+      rom.led_brightness[i] = DEFAULT_LED_BRIGHTNESS[i];
+    }
     rom.version = CURRENT_VERSION;
   }
 }
 
 void set_rom(String key, String value) {
-  switch(key) {
-    case "device_name":
-      for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
-        rom.device_name[i] = value[i];
-      }
-      break;
-    case "device_manufacturer":
-      for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
-        rom.device_manufacturer[i] = value[i];
-      }
-      break;
-    case "ssid":
-      for(int i = 0; i < SSID_LENGTH; ++i) {
-        rom.ssid[i] = value[i];
-      }
-      break;
-    case "password":
-      for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
-        rom.password[i] = value[i];
-      }
-      break;
-    case "delay_time":
-      rom.delay_time = value;
-      break;
+  if(key == "device_name") {
+    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
+      rom.device_name[i] = value[i];
+    }
+  } else if(key == "device_manufacturer") {
+    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
+      rom.device_manufacturer[i] = value[i];
+    }
+  } else if(key == "ssid") {
+    for(int i = 0; i < SSID_LENGTH; ++i) {
+      rom.ssid[i] = value[i];
+    }
+  } else if(key == "password") {
+    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
+      rom.password[i] = value[i];
+    }
+  } else if(key == "delay_time") {
+    rom.delay_time = value.toInt();
+  } else if(key == "led_brightness_r") {
+    rom.led_brightness[0] = value.toInt();
+  } else if(key == "led_brightness_g") {
+    rom.led_brightness[1] = value.toInt();
+  } else if(key == "led_brightness_b") {
+    rom.led_brightness[2] = value.toInt();
   }
 }
 
@@ -126,6 +136,26 @@ String html_head = "\
   <head>\
     <meta charset='UTF-8'>\
     <title>keyboard config</title>\
+    <style>\
+      label{\
+        font-size: 2em;\
+      }\
+      input{\
+        width: 80%;\
+        margin: 8%;\
+        font-size: 1.6em;\
+      }\
+      button[type=\"submit\"]{\
+        background-color: #04AA6D;\
+        border: none;\
+        color: white;\
+        padding: 4% 6%;\
+        text-decoration: none;\
+        margin: 0 8%;\
+        font-size: 2em;\
+        cursor: pointer;\
+      }\
+    </style>\
   <head>\
   <body>\
     <form action=\"/save\" method=\"post\">\
@@ -138,22 +168,51 @@ String html_foot = "\
 </html>\
 ";
 
-String get_html_text_input(char* name, char* value, char* label) {
+String get_html_text_input(String name, char* value, String label) {
   return "\
     <div>\
       <label>\
-        "+(String)label+"\
-        <input type=\"text\" name=\""+(String)name+"\" value=\""+(String)value+"\">\
+        "+label+"\
+        <input type=\"text\" name=\""+name+"\" value=\""+(String)value+"\">\
       </label>\
     </div>\
   ";
 }
 
-const int LED_LENGTH = 3;
-const int LED_RGB_PINS[LED_LENGTH] = {25, 32, 33};
-const int LED_RGB_CHANNELS[LED_LENGTH] = {LEDC_CHANNEL_R, LEDC_CHANNEL_G, LEDC_CHANNEL_B};
+String get_html_text_input(String name, int value, String label) {
+  return "\
+    <div>\
+      <label>\
+        "+label+"\
+        <input type=\"text\" name=\""+name+"\" value=\""+(String)value+"\">\
+      </label>\
+    </div>\
+  ";
+}
 
-BleKeyboard bleKeyboard(rom.device_name, rom.device_manufacturer, 100);
+String get_html_color_picker() {
+  return "\
+    <div>\
+      <label>\
+        赤\
+        <input type=\"range\" name=\"led_brightness_r\" min=\"0\" max=\"255\" value=\""+(String)rom.led_brightness[0]+"\">\
+      <label>\
+    </div>\
+    <div>\
+      <label>\
+        緑\
+        <input type=\"range\" name=\"led_brightness_g\" min=\"0\" max=\"255\" value=\""+(String)rom.led_brightness[1]+"\">\
+      <label>\
+    </div>\
+    <div>\
+      <label>\
+        青\
+        <input type=\"range\" name=\"led_brightness_b\" min=\"0\" max=\"255\" value=\""+(String)rom.led_brightness[2]+"\">\
+      <label>\
+    </div>\
+  ";
+}
+
 WebServer server(80);
 
 void PwmLed(int channel) {
@@ -178,18 +237,13 @@ unsigned int read_all_sw() {
   return pushed;
 }
 
-void setup_blekeyboard() {
-  bleKeyboard.begin();
-}
-
 void handleRoot() {
-  String html = html_head
-    +get_html_text_input("device_name", rom.device_name, "デバイス名")
-    +get_html_text_input("device_manufacturer", rom.device_manufacturer, "所持者")
-    +get_html_text_input("ssid", rom.ssid, "SSID")
-    +get_html_text_input("password", rom.password, "パスワード")
-    +get_html_text_input("delay_time", rom.delay_time, "待機時間")
-    +html_foot;
+  String html = html_head;
+  html += get_html_text_input("ssid", rom.ssid, "SSID");
+  html += get_html_text_input("password", rom.password, "パスワード");
+  html += get_html_text_input("delay_time", rom.delay_time, "反応時間");
+  html += get_html_color_picker();
+  html += html_foot;
   server.send(200, "text/html", html);
 }
 
@@ -200,6 +254,12 @@ void handleSave() {
     set_rom(server.argName(i), server.arg(i));
   }
   save_rom();
+
+  // LED set
+  for(int i = 0; i < LED_LENGTH; ++i) {
+    ledcWrite(LED_RGB_CHANNELS[i], rom.led_brightness[i]);
+  }
+  
   server.send(200, "text/plain", msg);
 }
 
@@ -218,6 +278,12 @@ void setup_config_server() {
   server.begin();
 }
 
+BleKeyboard bleKeyboard(DEFAULT_DEVICE_NAME, DEFAULT_DEVICE_MANUFACTURER, 100);
+
+void setup_blekeyboard() {
+  bleKeyboard.begin();
+}
+
 void setup() {
   // setting_sw pins setup
   pinMode(SETTING_SW_PIN, INPUT_PULLUP);
@@ -227,17 +293,17 @@ void setup() {
     pinMode(pin, INPUT_PULLUP);
   }
 
+  // EEPROM setup
+  EEPROM.begin(1024);
+  load_rom();
+  delay(10);
+
   // LED pins setup
   for(int i = 0; i < LED_LENGTH; ++i) {
     ledcSetup(LED_RGB_CHANNELS[i], LEDC_BASE_FREQ, LEDC_RESOLUTION);
     ledcAttachPin(LED_RGB_PINS[i], LED_RGB_CHANNELS[i]);
-    ledcWrite(LED_RGB_CHANNELS[i], 0);
+    ledcWrite(LED_RGB_CHANNELS[i], rom.led_brightness[i]);
   }
-  delay(10);
-
-  // EEPROM setup
-  EEPROM.begin(1024);
-  load_rom();
   delay(10);
 
   if(digitalRead(SETTING_SW_PIN) == LOW) {
