@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Keymap Preference</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="script.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>キーマップの設定 Keymap Preference</h1>
+    </header>
+    <main>
+
+        <div id="display-keymap">
+            <div class="nav-tabs" id="nav-tabs">
+                <div class="tab-item is-tab-active">layer 0</div>
+                <div class="tab-item">layer 1</div>
+                <div class="tab-item">layer 2</div>
+                <div class="tab-item">layer 3</div>
+            </div>
+            <div class="frame-tabs" id="frame-tabs">
+
+            </div>
+        </div>
+        <div id="display-key-form">
+            <form id="key-form" action="/set" method="POST">
+                <input type="hidden" name="layer-index">
+                <input type="hidden" name="key-index">
+                <div>
+                    <select id="select-key-form">
+                        <option value="select-key-num">キーを割当</option>
+                        <option value="input-key-text">テキストを割り当て</option>
+                    </select>
+                    <div class="indent-down">
+                        <select name="key-num" id="select-key-num"></select>
+                    </div>
+                    <div class="indent-down" style="display: none;">
+                        <input type="text" id="input-key-text">
+                    </div>
+                </div>
+                <div>
+                    <input type="submit" value="保存">
+                </div>
+            </form>
+        </div>
+
+    </main>
+    <footer>
+        <button id="debug">debug</button>
+    </footer>
+</body>
+
+</html>

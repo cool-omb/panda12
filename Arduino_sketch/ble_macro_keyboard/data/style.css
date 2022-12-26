@@ -1,0 +1,56 @@
+/* Display keymap */
+.nav-tabs {
+  display: flex;
+  border-bottom: 1px solid #d7dbdd;
+}
+
+.tab-item {
+  cursor: pointer;
+  padding: 5px 30px;
+  color: #16a2d7;
+  font-size: 12px;
+  border-bottom: 2px solid transparent;
+}
+
+.is-tab-active {
+  border-bottom-color: #4ebbe4;
+}
+
+.frame-tabs {
+  position: relative;
+  width: 90vw;
+  margin: 4vw;
+  overflow-x: auto;
+}
+
+.frame-tabs div {
+  position: absolute;
+}
+
+.key-sw {
+  background-color: lightsteelblue;
+  border-radius: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.key-sw div {
+  text-align: center;
+  word-break: break-word;
+}
+
+/* form style */
+#display-key-form form {
+  display: flex;
+  flex-direction: row;
+}
+
+select {
+  border: none;
+  box-shadow: 2px 2px 2px 1px lightblue;
+}
+
+.indent-down {
+  margin-left: 4vw;
+}
