@@ -50,6 +50,9 @@ bool handleUrl(String path)
     }
     return true;
   }
+  else if (path.endsWith("/set"))
+  {
+  }
   else if (path.endsWith("style.css"))
   {
     if (SPIFFS.exists("/style.css"))

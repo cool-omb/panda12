@@ -15,6 +15,14 @@ window.onload = () => {
   document
     .getElementById('frame-tabs')
     .addEventListener('click', onClickKeymap, false)
+
+  document
+    .getElementById('input-key-text')
+    .addEventListener('input', onInputKeySwText, false)
+
+  document
+    .getElementById('select-key-num')
+    .addEventListener('change', onChangeKeySwNumber, false)
   readInit()
 }
 
@@ -82,11 +90,16 @@ function appendKeymap() {
   removeChildAll(frameTabs)
   keymap.assign.forEach((assignLayer, layerIdx) => {
     navTabs.appendChild(createTabLayerElement(layerIdx))
-    frameTabs.appendChild(createKeymapLayerElement(keymap.layout, assignLayer))
+    frameTabs.appendChild(createKeymapLayoutLayerElement(keymap.layout))
+    assignLayer.forEach((row, outIndex) => {
+      row.forEach((keySw, inIndex) => {
+        writeKeySw(layerIdx, outIndex, inIndex)
+      })
+    })
   })
 }
 
-function createKeymapLayerElement(layout, assigns) {
+function createKeymapLayoutLayerElement(layout) {
   const frameDiv = document.createElement('div')
   frameDiv.classList.add('keymap-layer')
   const keyDivs = layout.map((row) =>
@@ -98,28 +111,41 @@ function createKeymapLayerElement(layout, assigns) {
       div.style.width = Math.round(KEY_SIZE_UNIT * item.width) + 'px'
       div.style.height = Math.round(KEY_SIZE_UNIT * item.height) + 'px'
       div.style.inlineSize = Math.round(KEY_SIZE_UNIT * item.width) + 'px'
+      const childDiv = document.createElement('div')
+      div.appendChild(childDiv)
       return div
     })
   )
-  keyDivs.forEach((row, i) =>
-    row.forEach((keyDiv, j) => {
-      if (i in assigns && j in assigns[i]) {
-        if (assigns[i][j].num >= 0) {
-          const keyNum = assigns[i][j].num
-          const div = document.createElement('div')
-          div.textContent = toDisplayName(keyNum)
-          keyDiv.appendChild(div)
-        } else {
-          const text = assigns[i][j].text
-          const div = document.createElement('div')
-          div.textContent = text.length >= 24 ? text.slice(0, 23) + '...' : text
-          keyDiv.appendChild(div)
-        }
-      }
+  keyDivs.forEach((row) =>
+    row.forEach((keyDiv) => {
       frameDiv.appendChild(keyDiv)
     })
   )
   return frameDiv
+}
+
+/**
+ * キーマップのkeySwを描画
+ * @param {int} layerIndex
+ * @param {int} outIndex
+ * @param {int} inIndex
+ */
+function writeKeySw(layerIndex, outIndex, inIndex) {
+  const keySwDiv = document
+    .querySelector('.keymap-layer:nth-child(' + Number(layerIndex + 1) + ')')
+    .querySelector('.key-sw:nth-child(' + Number(inIndex + 1) + ')')
+  const createTextContent = (keySw) => {
+    if (keySw.num >= 0) {
+      return toDisplayName(keySw.num)
+    } else {
+      return keySw.text.length >= 24
+        ? keySw.text.slice(0, 23) + '...'
+        : keySw.text
+    }
+  }
+  keySwDiv.querySelector('div').textContent = createTextContent(
+    keymap.assign[layerIndex][outIndex][inIndex]
+  )
 }
 
 function createTabLayerElement(idx) {
@@ -239,6 +265,10 @@ function toggleFormValue(event) {
   event.stopPropagation()
 }
 
+/**
+ * クリックしたキーの内容をフォームに反映する
+ * @param {Event} event - click event
+ */
 function onClickKeymap(event) {
   const getKeySwDiv = (target) => {
     let elem = target
@@ -277,4 +307,44 @@ function onClickKeymap(event) {
       countClickElementNumber(keySwDiv, 'key-sw')
     )
   }
+}
+
+/**
+ * key num 書き換えをkeymapに反映する
+ */
+function onChangeKeySwNumber() {
+  const form = document.getElementById('key-form')
+  const setKeymap = (form) => {
+    const layerIndex = Number(form['layer-index'].value)
+    const keySwIndex = Number(form['key-index'].value)
+    const keySw = keymap.assign[layerIndex][0][keySwIndex]
+    keySw.num = Number(form['key-num'].value)
+    keySw.text = ''
+  }
+  setKeymap(form)
+  writeKeySw(
+    Number(form['layer-index'].value),
+    0,
+    Number(form['key-index'].value)
+  )
+}
+
+/**
+ * key text 書き換えをkeymapに反映する
+ */
+function onInputKeySwText() {
+  const form = document.getElementById('key-form')
+  const setKeymap = (form) => {
+    const layerIndex = Number(form['layer-index'].value)
+    const keySwIndex = Number(form['key-index'].value)
+    const keySw = keymap.assign[layerIndex][0][keySwIndex]
+    keySw.num = -1
+    keySw.text = form['key-text'].value
+  }
+  setKeymap(form)
+  writeKeySw(
+    Number(form['layer-index'].value),
+    0,
+    Number(form['key-index'].value)
+  )
 }
