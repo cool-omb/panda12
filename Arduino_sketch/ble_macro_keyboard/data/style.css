@@ -4,6 +4,14 @@
   border-bottom: 1px solid #d7dbdd;
 }
 
+#display-keymap {
+  border-bottom: 1px solid #d7dbdd;
+}
+
+#display-key-form {
+  margin: 1vw 2vw;
+}
+
 .tab-item {
   cursor: pointer;
   padding: 5px 30px;
@@ -43,12 +51,21 @@
 /* form style */
 #display-key-form form {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
 }
 
 select {
   border: none;
   box-shadow: 2px 2px 2px 1px lightblue;
+}
+
+input {
+  border: none;
+  box-shadow: 2px 2px 2px 1px lightblue;
+}
+
+#input-key-text {
+  width: 90vw;
 }
 
 .indent-down {

@@ -12,23 +12,29 @@ window.onload = () => {
     .getElementById('select-key-form')
     .addEventListener('change', toggleSelect, false)
 
+  document
+    .getElementById('frame-tabs')
+    .addEventListener('click', onClickKeymap, false)
   readInit()
 }
 
 function toggleTabs(event) {
+  const target = event.target
+  if (!target.classList.contains('tab-item')) {
+    return
+  }
   const activeClassName = 'is-tab-active'
   const tabsClassName = 'tab-item'
   const allTabs = document.querySelectorAll('.' + tabsClassName)
   allTabs.forEach((item) => {
     item.classList.remove(activeClassName)
   })
-  const target = event.target
   target.classList.add(activeClassName)
   toggleLayer(target)
 }
 
 function toggleLayer(targetTab) {
-  const layerNum = countElementNumber(targetTab)
+  const layerNum = countClickElementNumber(targetTab, 'tab-item')
   const frameTabs = document.querySelectorAll('.keymap-layer')
   frameTabs.forEach((frame) => {
     frame.style.display = 'none'
@@ -41,6 +47,7 @@ function readInit() {
     appendKeymap()
     document.getElementById('nav-tabs').children[0].click()
     appendAllSelectKeyNum()
+    document.querySelectorAll('.key-sw')[0].click()
   })
 }
 
@@ -169,8 +176,6 @@ function toDisplayName(num) {
 function toggleSelect(event) {
   const selectedId = event.target.value
   const select = event.target
-  console.log('toggleSelect : select')
-  console.log(select)
   const optionAll = select.querySelectorAll('option')
   for (const option of optionAll) {
     const id = option.value
@@ -209,11 +214,67 @@ function getKeyFormValue() {
 /**
  * 同じ深さの要素の中で何番目か取得する
  * @param {Element} target - body 以上の HTML Element
+ * @param {string} className -
  * @returns {int} - 0始まりのindex
  */
-function countElementNumber(target) {
+function countClickElementNumber(target, className) {
   const parent = target.parentElement
-  return [...parent.querySelectorAll(target.tagName)].findIndex(
+  return [...parent.querySelectorAll('.' + className)].findIndex(
     (elem) => elem == target
   )
+}
+
+/**
+ * 何番目のtabがactiveか取得する
+ * @returns {int} - 0始まりのindex
+ */
+function countLayerNumber() {
+  return [...document.querySelectorAll('.tab-item')].findIndex((elem) =>
+    elem.classList.contains('is-tab-active')
+  )
+}
+
+function toggleFormValue(event) {
+  const clickTarget = event.target
+  event.stopPropagation()
+}
+
+function onClickKeymap(event) {
+  const getKeySwDiv = (target) => {
+    let elem = target
+    while (elem) {
+      if (elem.classList.contains('key-sw')) {
+        return elem
+      }
+      elem = elem.parentElement
+    }
+    return null
+  }
+  const keySwDiv = getKeySwDiv(event.target)
+  if (keySwDiv) {
+    const setFormValue = (layerIndex, keyIndex) => {
+      const form = document.getElementById('key-form')
+      form['layer-index'].value = layerIndex
+      form['key-index'].value = keyIndex
+      const keySw = keymap.assign[layerIndex][0][keyIndex]
+      console.log('layerIndex', layerIndex)
+      console.log('keyIndex', keyIndex)
+      console.log('keySw', keySw)
+      if (keySw.num >= 0) {
+        form['select-key-form'].value = 'select-key-num'
+        form['select-key-form'].dispatchEvent(new Event('change'))
+        form['key-num'].value = keySw.num
+        form['key-text'].value = ''
+      } else {
+        form['select-key-form'].value = 'input-key-text'
+        form['select-key-form'].dispatchEvent(new Event('change'))
+        form['key-num'].value = -1
+        form['key-text'].value = keySw.text
+      }
+    }
+    setFormValue(
+      countLayerNumber(),
+      countClickElementNumber(keySwDiv, 'key-sw')
+    )
+  }
 }
