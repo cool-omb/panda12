@@ -33,11 +33,89 @@ void captivePortal()
   server.client().stop();
 }
 
+void setup_routing()
+{
+  server.on("/", sendMainPage);
+  server.on("/style.css", sendStyleSheet);
+  server.on("/script.js", sendScript);
+  server.on("/keymap.json", sendKeymap);
+  server.on("/metakey.json", sendMetakey);
+}
+
+void sendMainPage()
+{
+  if (SPIFFS.exists("/index.html"))
+  {
+    File file = SPIFFS.open("/index.html", "r");
+    server.streamFile(file, "text/html");
+    file.close();
+  }
+  else
+  {
+    server.send(404, "text/plain", "ESP: 404 not found.");
+  }
+}
+
+void sendStyleSheet()
+{
+  if (SPIFFS.exists("/style.css"))
+  {
+    File file = SPIFFS.open("/style.css", "r");
+    server.streamFile(file, "text/css");
+    file.close();
+  }
+  else
+  {
+    server.send(404, "text/plain", "ESP: 404 not found.");
+  }
+}
+
+void sendScript()
+{
+  if (SPIFFS.exists("/script.js"))
+  {
+    File file = SPIFFS.open("/script.js", "r");
+    server.streamFile(file, "text/javascript");
+    file.close();
+  }
+  else
+  {
+    server.send(404, "text/plain", "ESP: 404 not found.");
+  }
+}
+
+void sendKeymap()
+{
+  if (SPIFFS.exists("/keymap.json"))
+  {
+    File file = SPIFFS.open("/keymap.json", "r");
+    server.streamFile(file, "application/json");
+    file.close();
+  }
+  else
+  {
+    server.send(404, "text/plain", "ESP: 404 not found.");
+  }
+}
+
+void sendMetakey()
+{
+  if (SPIFFS.exists("/metakey.json"))
+  {
+    File file = SPIFFS.open("/metakey.json", "r");
+    server.streamFile(file, "application/json");
+    file.close();
+  }
+  else
+  {
+    server.send(404, "text/plain", "ESP: 404 not found.");
+  }
+}
+
 bool handleUrl(String path)
 {
   if (path.endsWith("/"))
   {
-
     if (SPIFFS.exists("/index.html"))
     {
       File file = SPIFFS.open("/index.html", "r");
@@ -126,12 +204,12 @@ void setup()
   WiFi.softAPConfig(ip, ip, subnet);
   WiFi.softAP(ap_ssid);
   dnsServer.start(DNS_PORT, "*", ip);
-
-  server.onNotFound([]()
-                    {
-        if (!handleUrl(server.uri())) {
-            captivePortal(); //ESP32のページにリダイレクトする capative portalの仕組み
-        } });
+  server.onNotFound(captivePortal);
+  // server.onNotFound([]()
+  //                   {
+  //       if (!handleUrl(server.uri())) {
+  //           captivePortal(); //ESP32のページにリダイレクトする capative portalの仕組み
+  //       } });
   server.begin();
 }
 

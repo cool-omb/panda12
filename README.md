@@ -19,3 +19,8 @@ Bluetooth 接続の 12 キーキーボード。
   - [arduino-esp8266fs-plugin v0.5.0](https://github.com/esp8266/arduino-esp8266fs-plugin)
   - [Arduino ESP32 filesystem uploader v1.0](https://github.com/me-no-dev/arduino-esp32fs-plugin)
   - [ESP8266_Spiram](https://github.com/Gianbacchio/ESP8266_Spiram)
+  - [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
+
+## 参考 Reference
+
+- [CaptivePortalExample](https://github.com/elliotmade/ESP32-Captive-Portal-Example/blob/test/src/main.cpp)
