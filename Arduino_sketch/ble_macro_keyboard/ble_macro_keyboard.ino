@@ -1,220 +1,132 @@
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <WebServer.h>
-#include <ESPmDNS.h>
-#include <DNSServer.h>
-#include <FS.h>
+#include <Arduino.h>
+#include <AsyncTCP.h>
+#include "ESPAsyncWebServer.h"
+#include "DNSServer.h"
 #include <SPIFFS.h>
+#include "AsyncJson.h"
+#include "ArduinoJson.h"
+#include <FS.h>
 
-// 無線LANの設定　アクセスポイントのSSIDとパスワード
-const char *ap_ssid = "Preference_for_keyboard"; // APのSSID
-IPAddress ip(192, 168, 1, 100);
-IPAddress subnet(255, 255, 255, 0);
-const byte DNS_PORT = 53;
+#define LED_R_PIN 27
+#define LED_G_PIN 25
+#define LED_B_PIN 26
+
+const char *SSID = "Preference_Keyboard";
+
+AsyncWebServer server(80);
+
 DNSServer dnsServer;
-WebServer server(80);
 
-String toStringIp(IPAddress ip)
-{
+StaticJsonDocument<int(pow(2,16))> jsonDocument;
+
+void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
+  if (!index) {
+      request->_tempFile = SPIFFS.open("/" + filename, "w");
+  }
+  if (len) {
+      request->_tempFile.write(data, len);
+  }
+  if (final) {
+      request->_tempFile.close();
+      request->send(200, "text/plain", "filename: "+String(filename));
+  }
+}
+
+void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
+  DynamicJsonDocument jsonResponse(1024);
   String res = "";
-  for (int i = 0; i < 3; i++)
-  {
-    res += String((ip >> (8 * i)) & 0xFF) + ".";
+  if(!index){
+    Serial.printf("BodyStart: %u B\n", total);
+    request->_tempFile = SPIFFS.open("/keymap.json", "w");
   }
-  res += String(((ip >> 8 * 3)) & 0xFF);
-  return res;
+  request->_tempFile.write(data, len);
+  Serial.printf("%s", (const char*)data);
+  if(index + len == total){
+    request->_tempFile.close();
+    request->send(200, "text/plain", "/keymap.json");
+    Serial.printf("BodyEnd: %u B\n", total);
+  }
+  // request->send(200, "text/plain", res);
 }
 
-void captivePortal()
+void webServerSetup()
 {
-  // 無効リクエストはすべてESP32に向ける
-  server.sendHeader("Location", String("http://") + toStringIp(server.client().localIP()), true);
-  server.send(302, "text/plain", "");
-  server.client().stop();
+  AsyncCallbackJsonWebHandler* jsonHandler = new AsyncCallbackJsonWebHandler(
+    "/keymap.json", [](AsyncWebServerRequest *request, JsonVariant &json
+    ) {
+      // JsonObject jsonObject = json.as<JsonObject>();
+      Serial.println("Call AsyncCallbackJsonWebHandler.");
+      request->send(200, "application/json", "{test: \"ok\"}");
+    }
+  );
+  server.addHandler(jsonHandler);
+
+  server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+  server.on(
+    "/post",
+    HTTP_POST,
+    [](AsyncWebServerRequest* request){
+      request->send(200, "text/plain", "keymap.json posted.");
+    },
+    handleUpload,
+    handleBody
+  );
+  
+  // server.on("/keymap.json", HTTP_POST, [](AsyncWebServerRequest* request) {
+    // AsyncWebServerResponse* response = request->beginResponse(200, "text/html", "hello world");
+    // response->addHeader("Connection", "close");
+    // request->send(response);
+  //   }, handleUpload);
+
+  // server.onFileUpload(handleUpload);
+
+  server.onNotFound([](AsyncWebServerRequest *request)
+  {
+    String redirectUrl = "http://";
+    redirectUrl += WiFi.softAPIP().toString();
+    redirectUrl += "/";
+    request->redirect(redirectUrl);
+  });
+
+  server.begin();
 }
 
-void setup_routing()
-{
-  server.on("/", sendMainPage);
-  server.on("/style.css", sendStyleSheet);
-  server.on("/script.js", sendScript);
-  server.on("/keymap.json", sendKeymap);
-  server.on("/metakey.json", sendMetakey);
+void setJson(AsyncWebServerRequest *request) {
+  request->send(200, "text/plain", String(request->arg("body")));
+  // if (request->hasParam("body", true)) {
+  //   request->send(200, "text/plain", String(request->getParam("body", true)->value()));
+  // } else {
+  //   request->send(200, "text/plain", "Not found body param.");
+  // }
 }
 
-void sendMainPage()
-{
-  if (SPIFFS.exists("/index.html"))
-  {
-    File file = SPIFFS.open("/index.html", "r");
-    server.streamFile(file, "text/html");
-    file.close();
-  }
-  else
-  {
-    server.send(404, "text/plain", "ESP: 404 not found.");
-  }
-}
 
-void sendStyleSheet()
-{
-  if (SPIFFS.exists("/style.css"))
-  {
-    File file = SPIFFS.open("/style.css", "r");
-    server.streamFile(file, "text/css");
-    file.close();
-  }
-  else
-  {
-    server.send(404, "text/plain", "ESP: 404 not found.");
-  }
-}
 
-void sendScript()
-{
-  if (SPIFFS.exists("/script.js"))
-  {
-    File file = SPIFFS.open("/script.js", "r");
-    server.streamFile(file, "text/javascript");
-    file.close();
-  }
-  else
-  {
-    server.send(404, "text/plain", "ESP: 404 not found.");
-  }
-}
-
-void sendKeymap()
-{
-  if (SPIFFS.exists("/keymap.json"))
-  {
-    File file = SPIFFS.open("/keymap.json", "r");
-    server.streamFile(file, "application/json");
-    file.close();
-  }
-  else
-  {
-    server.send(404, "text/plain", "ESP: 404 not found.");
-  }
-}
-
-void sendMetakey()
-{
-  if (SPIFFS.exists("/metakey.json"))
-  {
-    File file = SPIFFS.open("/metakey.json", "r");
-    server.streamFile(file, "application/json");
-    file.close();
-  }
-  else
-  {
-    server.send(404, "text/plain", "ESP: 404 not found.");
-  }
-}
-
-bool handleUrl(String path)
-{
-  if (path.endsWith("/"))
-  {
-    if (SPIFFS.exists("/index.html"))
-    {
-      File file = SPIFFS.open("/index.html", "r");
-      server.streamFile(file, "text/html");
-      file.close();
-    }
-    else
-    {
-      server.send(404, "text/plain", "ESP: 404 not found.");
-    }
-    return true;
-  }
-  else if (path.endsWith("/set"))
-  {
-  }
-  else if (path.endsWith("style.css"))
-  {
-    if (SPIFFS.exists("/style.css"))
-    {
-      File file = SPIFFS.open("/style.css", "r");
-      server.streamFile(file, "text/css");
-      file.close();
-    }
-    else
-    {
-      server.send(404, "text/plain", "ESP: 404 not found.");
-    }
-    return true;
-  }
-  else if (path.endsWith("script.js"))
-  {
-    if (SPIFFS.exists("/script.js"))
-    {
-      File file = SPIFFS.open("/script.js", "r");
-      server.streamFile(file, "text/javascript");
-      file.close();
-    }
-    else
-    {
-      server.send(404, "text/plain", "ESP: 404 not found.");
-    }
-    return true;
-  }
-  else if (path.endsWith("keymap.json"))
-  {
-    if (SPIFFS.exists("/keymap.json"))
-    {
-      File file = SPIFFS.open("/keymap.json", "r");
-      server.streamFile(file, "application/json");
-      file.close();
-    }
-    else
-    {
-      server.send(404, "text/plain", "ESP: 404 not found.");
-    }
-    return true;
-  }
-  else if (path.endsWith("metakey.json"))
-  {
-    if (SPIFFS.exists("/metakey.json"))
-    {
-      File file = SPIFFS.open("/metakey.json", "r");
-      server.streamFile(file, "application/json");
-      file.close();
-    }
-    else
-    {
-      server.send(404, "text/plain", "ESP: 404 not found.");
-    }
-    return true;
-  }
-  return false;
+void setupLed() {
+  pinMode(LED_R_PIN, OUTPUT);
+  pinMode(LED_G_PIN, OUTPUT);
+  pinMode(LED_B_PIN, OUTPUT);
+  digitalWrite(LED_R_PIN, LOW);
+  digitalWrite(LED_G_PIN, LOW);
+  digitalWrite(LED_B_PIN, LOW);
 }
 
 void setup()
 {
-  // SPIFFSのセットアップ
-  if (!SPIFFS.begin(true))
-  {
-    Serial.println("SPIFFS Mount Failed");
-    return;
-  }
+  setupLed();
 
-  // 無線LAN接続APモード
-  WiFi.mode(WIFI_AP);
-  WiFi.softAPConfig(ip, ip, subnet);
-  WiFi.softAP(ap_ssid);
-  dnsServer.start(DNS_PORT, "*", ip);
-  server.onNotFound(captivePortal);
-  // server.onNotFound([]()
-  //                   {
-  //       if (!handleUrl(server.uri())) {
-  //           captivePortal(); //ESP32のページにリダイレクトする capative portalの仕組み
-  //       } });
-  server.begin();
+  Serial.begin(115200);
+
+  SPIFFS.begin();
+
+  WiFi.softAP(SSID);
+
+  dnsServer.start(53, "*", WiFi.softAPIP());
+
+  webServerSetup();
 }
 
 void loop()
 {
   dnsServer.processNextRequest();
-  server.handleClient();
 }

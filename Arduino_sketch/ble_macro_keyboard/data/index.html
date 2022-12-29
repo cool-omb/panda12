@@ -28,7 +28,7 @@
             </div>
         </div>
         <div id="display-key-form">
-            <form id="key-form" action="/set" method="POST">
+            <form id="key-form" action="/keymap.json" method="POST">
                 <input type="hidden" name="layer-index">
                 <input type="hidden" name="key-index">
                 <div>
@@ -42,6 +42,9 @@
                     <div class="indent-down" style="display: none;">
                         <input type="text" name="key-text" id="input-key-text">
                     </div>
+                </div>
+                <div>
+                    <input type="file" name="test">
                 </div>
                 <div>
                     <input type="submit" value="保存">

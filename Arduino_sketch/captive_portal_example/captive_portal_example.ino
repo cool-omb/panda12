@@ -1,51 +1,70 @@
-#include <Arduino.h>
+#include <DNSServer.h>
+#ifdef ESP32
+#include <WiFi.h>
 #include <AsyncTCP.h>
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#endif
 #include "ESPAsyncWebServer.h"
-#include "DNSServer.h"
 #include <SPIFFS.h>
-
-const char *SSID = "Preference_Keyboard";
-
-AsyncWebServer server(80);
+#include "AsyncJson.h"
+#include "ArduinoJson.h"
 
 DNSServer dnsServer;
+AsyncWebServer server(80);
+
+class CaptiveRequestHandler : public AsyncWebHandler {
+public:
+    CaptiveRequestHandler() {}
+    virtual ~CaptiveRequestHandler() {}
+
+    bool canHandle(AsyncWebServerRequest *request){
+        //request->addInterestingHeader("ANY");
+        return true;
+    }
+
+    void handleRequest(AsyncWebServerRequest *request) {
+        request->send(SPIFFS, "/index.html", "text/html");
+    }
+};
+
 
 void webServerSetup()
 {
+    // server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
 
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send(SPIFFS, "/index.html", "text/html"); });
-    server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send(SPIFFS, "/style.css", "text/css"); });
-    server.on("/script.js", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send(SPIFFS, "/script.js", "text/javascript"); });
-    server.on("/keymap.json", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send(SPIFFS, "/keymap.json", "application/json"); });
-    server.on("/metakey.json", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send(SPIFFS, "/metakey.json", "application/json"); });
+    AsyncCallbackJsonWebHandler* jsonHandler = new AsyncCallbackJsonWebHandler(
+        "/keymap.json", [](AsyncWebServerRequest *request, JsonVariant &json
+        ) {
+        // JsonObject jsonObject = json.as<JsonObject>();
+        Serial.println("Call AsyncCallbackJsonWebHandler.");
+        request->send(200, "application/json", "{test: \"ok\"}");
+        }
+    );
+    server.addHandler(jsonHandler);
 
-    server.onNotFound([](AsyncWebServerRequest *request)
-                      {
-                          String redirectUrl = "http://";
-                          redirectUrl += WiFi.softAPIP().toString();
-                          redirectUrl += "/";
-                          request->redirect(redirectUrl); });
+    server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+    
+    // server.on("/keymap.json", HTTP_POST, [](AsyncWebServerRequest* request) {
+        // AsyncWebServerResponse* response = request->beginResponse(200, "text/html", "hello world");
+        // response->addHeader("Connection", "close");
+        // request->send(response);
+    //   }, handleUpload);
+
+    // server.onFileUpload(handleUpload);
 
     server.begin();
 }
 
-void setup()
-{
+void setup(){
+    Serial.begin(115200);
     SPIFFS.begin();
-
-    WiFi.softAP(SSID);
-
+    WiFi.softAP("esp-captive");
     dnsServer.start(53, "*", WiFi.softAPIP());
-
     webServerSetup();
 }
 
-void loop()
-{
-    dnsServer.processNextRequest();
+void loop(){
+    dnsServer.processNextRequest();   
 }

@@ -23,6 +23,10 @@ window.onload = () => {
   document
     .getElementById('select-key-num')
     .addEventListener('change', onChangeKeySwNumber, false)
+
+  document
+    .getElementById('key-form')
+    .addEventListener('submit', onSubmit, false)
   readInit()
 }
 
@@ -347,4 +351,38 @@ function onInputKeySwText() {
     0,
     Number(form['key-index'].value)
   )
+}
+
+function onSubmit(event) {
+  postKeymap()
+  event.preventDefault()
+}
+
+/**
+ * JSONをPOST
+ */
+function postKeymap() {
+  fetch('/post', {
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(keymap)
+  }).then((response) => {
+    if (response.ok) {
+      alert('保存しました。')
+    } else {
+      alert('保存に失敗しました。')
+    }
+  })
+  // const request = new XMLHttpRequest()
+  // request.open('POST', '/set', true)
+  // request.setRequestHeader('Content-Type', 'application/json')
+  // request.onload = () => {
+  //   alert('保存しました。')
+  // }
+  // request.onerror = () => {
+  //   alert('保存に失敗しました。')
+  // }
+  // request.send(JSON.stringify(keymap))
 }
