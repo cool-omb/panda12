@@ -1,233 +1,158 @@
-#include <EEPROM.h>
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <WebServer.h>
+#include <Arduino.h>
+#include <AsyncTCP.h>
+#include "ESPAsyncWebServer.h"
+#include "DNSServer.h"
+#include <SPIFFS.h>
+#include "ArduinoJson.h"
+#include <FS.h>
 #include <BleKeyboard.h>
 
+using namespace std;
 
+#define LED_R_PIN 25
+#define LED_G_PIN 32
+#define LED_B_PIN 33
 #define LEDC_BASE_FREQ 12800
 #define LEDC_RESOLUTION 8
 #define LEDC_CHANNEL_R 0
 #define LEDC_CHANNEL_G 1
 #define LEDC_CHANNEL_B 2
 
-using namespace std;
 
+#define PREFERENCE_SW_PIN 13
+#define DEFAULT_DEVICE_NAME "Test_Keyboard"
+#define DEFAULT_DEVICE_MANUFACTURER "Panda12_manufacturer"
 
-
-const int SETTING_SW_PIN = 13;
+bool isConfig = false;
 const vector<int> SW_PINS{16, 19, 23, 14, 4, 18, 22, 27, 15, 17, 21, 26};
 
-const IPAddress static_ip(192, 168, 4, 1);
-const IPAddress subnet(255, 255, 255, 0);
+const char *SSID = "Preference_Keyboard";
 
-const int KEYMAPS_ROW_LENGTH = 4;
-const int KEYMAPS_COLUMN_LENGTH = 12;
-const int DEFAULT_LAYERS_SWITCH[] = {0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1};
-const char DEFAULT_KEYMAPS[KEYMAPS_ROW_LENGTH][KEYMAPS_COLUMN_LENGTH] = {
-  {'1', '2', '3', '0', '4', '5', '6', '\0', '7', '8', '9', '\0'},
-  {'+', '-', '*', '/', '%', '(', ')', '\0', KEY_LEFT_ARROW, KEY_RIGHT_ARROW, KEY_BACKSPACE, '\0'},
-  {KEY_F1, KEY_F2, KEY_F3, KEY_F10, KEY_F4, KEY_F5, KEY_F6, '\0', KEY_F7, KEY_F8, KEY_F9, '\0'},
-  {KEY_F11, KEY_F12, KEY_F13, KEY_F20, KEY_F14, KEY_F15, KEY_F16, '\0', KEY_F17, KEY_F18, KEY_F19, '\0'}
-};
+int LAYER_LENGTH = -1;
+int OUTPUT_LENGTH = -1;
+int INPUT_LENGTH = -1;
+int INTERVAL_MS = 100;
+int IS_LED_ON = 0;
+int LED_R_BRIGHTNESS = 0;
+int LED_G_BRIGHTNESS = 0;
+int LED_B_BRIGHTNESS = 0;
 
-const int CHAR_ARRAY_LENGTH = 64;
-const int SSID_LENGTH = 32;
-const char* DEFAULT_DEVICE_NAME = "keyboard_panda12";
-const char* DEFAULT_DEVICE_MANUFACTURER = "panda12_manufacturer";
+AsyncWebServer server(80);
+DNSServer dnsServer;
 
-const char* DEFAULT_SSID = "Keyboard_config";
-const char* DEFAULT_PASSWORD = "password";
+BleKeyboard bleKeyboard(DEFAULT_DEVICE_NAME, DEFAULT_DEVICE_MANUFACTURER, 100);
+DynamicJsonDocument preferenceDocument(65536);
 
-const int DEFAULT_DELAY_TIME = 25;
+void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
+  // if (!index) {
+  //     request->_tempFile = SPIFFS.open("/" + filename, "w");
+  // }
+  // if (len) {
+  //     request->_tempFile.write(data, len);
+  // }
+  // if (final) {
+  //     request->_tempFile.close();
+  //     request->send(200, "text/plain", "filename: "+String(filename));
+  // }
+}
 
-const int LED_LENGTH = 3;
-const int LED_RGB_PINS[LED_LENGTH] = {25, 32, 33};
-const int LED_RGB_CHANNELS[LED_LENGTH] = {LEDC_CHANNEL_R, LEDC_CHANNEL_G, LEDC_CHANNEL_B};
-
-const int DEFAULT_LED_BRIGHTNESS[LED_LENGTH] = {0, 0, 0};
-
-const int CURRENT_VERSION = 11;
-
-bool is_config = false;
-
-struct ROM{
-  int version;
-  char device_name[CHAR_ARRAY_LENGTH];
-  char device_manufacturer[CHAR_ARRAY_LENGTH];
-  char ssid[SSID_LENGTH];
-  char password[CHAR_ARRAY_LENGTH];
-  int delay_time;
-  int layers_switch[KEYMAPS_COLUMN_LENGTH];
-  char keymaps[KEYMAPS_ROW_LENGTH][KEYMAPS_COLUMN_LENGTH];
-  int led_brightness[LED_LENGTH];
-};
-
-ROM rom;
-
-// EEPROM から読み込み。保存されていない場合はデフォルト値に。
-void load_rom() {
-  EEPROM.get<ROM>(0x00, rom);
-  if(rom.version != CURRENT_VERSION) {
-    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
-      rom.device_name[i] = DEFAULT_DEVICE_NAME[i];
-    }
-    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
-      rom.device_manufacturer[i] = DEFAULT_DEVICE_MANUFACTURER[i];
-    }
-    for(int i = 0; i < SSID_LENGTH; ++i) {
-      rom.ssid[i] = DEFAULT_SSID[i];
-    }
-    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
-      rom.password[i] = DEFAULT_PASSWORD[i];
-    }
-    rom.delay_time = DEFAULT_DELAY_TIME;
-    for(int i = 0; i < KEYMAPS_ROW_LENGTH; ++i) {
-      for(int j = 0; j < KEYMAPS_COLUMN_LENGTH; ++j) {
-        rom.keymaps[i][j] = DEFAULT_KEYMAPS[i][j];
-      }
-    }
-    for(int i = 0; i < KEYMAPS_COLUMN_LENGTH; ++i) {
-      rom.layers_switch[i] = DEFAULT_LAYERS_SWITCH[i];
-    }
-    for(int i = 0; i < LED_LENGTH; ++i) {
-      rom.led_brightness[i] = DEFAULT_LED_BRIGHTNESS[i];
-    }
-    rom.version = CURRENT_VERSION;
+void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
+  if(!index){
+    // Serial.printf("BodyStart: %u B\n", total);
+    request->_tempFile = SPIFFS.open("/keymap.json", "w");
+  }
+  request->_tempFile.write(data, len);
+  // Serial.printf("%s", (const char*)data);
+  if(index + len == total){
+    request->_tempFile.close();
+    request->send(200, "text/plain", "Write keymap.json success.");
+    // Serial.printf("BodyEnd: %u B\n", total);
   }
 }
 
-void set_rom(String key, String value) {
-  if(key == "device_name") {
-    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
-      rom.device_name[i] = value[i];
-    }
-  } else if(key == "device_manufacturer") {
-    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
-      rom.device_manufacturer[i] = value[i];
-    }
-  } else if(key == "ssid") {
-    for(int i = 0; i < SSID_LENGTH; ++i) {
-      rom.ssid[i] = value[i];
-    }
-  } else if(key == "password") {
-    for(int i = 0; i < CHAR_ARRAY_LENGTH; ++i) {
-      rom.password[i] = value[i];
-    }
-  } else if(key == "delay_time") {
-    rom.delay_time = value.toInt();
-  } else if(key == "led_brightness_r") {
-    rom.led_brightness[0] = value.toInt();
-  } else if(key == "led_brightness_g") {
-    rom.led_brightness[1] = value.toInt();
-  } else if(key == "led_brightness_b") {
-    rom.led_brightness[2] = value.toInt();
+void webServerSetup()
+{
+  server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+  server.on(
+    "/post",
+    HTTP_POST,
+    [](AsyncWebServerRequest* request){
+      request->send(200, "text/plain", "keymap.json posted.");
+    },
+    handleUpload,
+    handleBody
+  );
+
+  server.onNotFound([](AsyncWebServerRequest *request)
+  {
+    String redirectUrl = "http://";
+    redirectUrl += WiFi.softAPIP().toString();
+    redirectUrl += "/";
+    request->redirect(redirectUrl);
+  });
+
+  server.begin();
+}
+
+
+void setupLed() {
+  if(IS_LED_ON) {
+    ledcSetup(LEDC_CHANNEL_R, LEDC_BASE_FREQ, LEDC_RESOLUTION);
+    ledcAttachPin(LED_R_PIN, LEDC_CHANNEL_R);
+    ledcWrite(LEDC_CHANNEL_R, LED_R_BRIGHTNESS);
+    ledcSetup(LEDC_CHANNEL_G, LEDC_BASE_FREQ, LEDC_RESOLUTION);
+    ledcAttachPin(LED_G_PIN, LEDC_CHANNEL_G);
+    ledcWrite(LEDC_CHANNEL_G, LED_G_BRIGHTNESS);
+    ledcSetup(LEDC_CHANNEL_B, LEDC_BASE_FREQ, LEDC_RESOLUTION);
+    ledcAttachPin(LED_B_PIN, LEDC_CHANNEL_B);
+    ledcWrite(LEDC_CHANNEL_B, LED_B_BRIGHTNESS);
   }
 }
 
-void save_rom() {
-  EEPROM.put<ROM>(0x00, rom);
-  EEPROM.commit();
-}
-
-String html_head = "\
-<!DOCTYPE html>\
-<html lang='ja'>\
-  <head>\
-    <meta charset='UTF-8'>\
-    <title>keyboard config</title>\
-    <style>\
-      label{\
-        font-size: 2em;\
-      }\
-      input{\
-        width: 80%;\
-        margin: 8%;\
-        font-size: 1.6em;\
-      }\
-      button[type=\"submit\"]{\
-        background-color: #04AA6D;\
-        border: none;\
-        color: white;\
-        padding: 4% 6%;\
-        text-decoration: none;\
-        margin: 0 8%;\
-        font-size: 2em;\
-        cursor: pointer;\
-      }\
-    </style>\
-  <head>\
-  <body>\
-    <form action=\"/save\" method=\"post\">\
-";
-
-String html_foot = "\
-      <button type=\"submit\">保存</button>\
-    </form>\
-  </body>\
-</html>\
-";
-
-String get_html_text_input(String name, char* value, String label) {
-  return "\
-    <div>\
-      <label>\
-        "+label+"\
-        <input type=\"text\" name=\""+name+"\" value=\""+(String)value+"\">\
-      </label>\
-    </div>\
-  ";
-}
-
-String get_html_text_input(String name, int value, String label) {
-  return "\
-    <div>\
-      <label>\
-        "+label+"\
-        <input type=\"text\" name=\""+name+"\" value=\""+(String)value+"\">\
-      </label>\
-    </div>\
-  ";
-}
-
-String get_html_color_picker() {
-  return "\
-    <div>\
-      <label>\
-        赤\
-        <input type=\"range\" name=\"led_brightness_r\" min=\"0\" max=\"255\" value=\""+(String)rom.led_brightness[0]+"\">\
-      <label>\
-    </div>\
-    <div>\
-      <label>\
-        緑\
-        <input type=\"range\" name=\"led_brightness_g\" min=\"0\" max=\"255\" value=\""+(String)rom.led_brightness[1]+"\">\
-      <label>\
-    </div>\
-    <div>\
-      <label>\
-        青\
-        <input type=\"range\" name=\"led_brightness_b\" min=\"0\" max=\"255\" value=\""+(String)rom.led_brightness[2]+"\">\
-      <label>\
-    </div>\
-  ";
-}
-
-WebServer server(80);
-
-void PwmLed(int channel) {
-  static uint8_t brightness[3] = {0, 0, 0};
-  static int diff[3] = {1, 1, 1};
-  ledcWrite(channel, brightness[channel]);
-  if (brightness[channel] == 0) {
-    diff[channel] = 1;
-  } else if (brightness[channel] == 255) {
-    diff[channel] = -1;
+void setupPinMode() {
+  pinMode(PREFERENCE_SW_PIN, INPUT_PULLUP);
+  for(int pin : SW_PINS) {
+    pinMode(pin, INPUT_PULLUP);
   }
-  brightness[channel] += diff[channel];
 }
 
-unsigned int read_all_sw() {
+void setupPreferenceMode() {
+  WiFi.softAP(SSID);
+  dnsServer.start(53, "*", WiFi.softAPIP());
+  webServerSetup();
+}
+
+void setupKeyboardMode() {
+  File file = SPIFFS.open("/keymap.json", "r");
+  DeserializationError error = deserializeJson(preferenceDocument, file);
+  if (error) {
+    // Serial.println(F("Error: deserializeJson"));
+    // Serial.println(error.c_str());
+  }
+  JsonObject root = preferenceDocument.as<JsonObject>();
+
+  // Serial.println(preferenceDocument["version"].as<String>());
+  // Serial.println(preferenceDocument["layout"][0].as<String>());
+  file.close();
+
+  LAYER_LENGTH = preferenceDocument["length"]["layer"].as<int>();
+  OUTPUT_LENGTH = preferenceDocument["length"]["output"].as<int>();
+  INPUT_LENGTH = preferenceDocument["length"]["input"].as<int>();
+  INTERVAL_MS = preferenceDocument["preference"]["interval"].as<int>();
+  IS_LED_ON = preferenceDocument["preference"]["ledOn"].as<int>();
+  LED_R_BRIGHTNESS = preferenceDocument["preference"]["ledRed"].as<int>();
+  LED_G_BRIGHTNESS = preferenceDocument["preference"]["ledGreen"].as<int>();
+  LED_B_BRIGHTNESS = preferenceDocument["preference"]["ledBlue"].as<int>();
+
+  setupLed();
+
+  delay(20);
+  // Serial.println(INPUT_LENGTH);
+  bleKeyboard.begin();
+  delay(100);
+}
+
+unsigned int readAllPushedBit() {
   unsigned int pushed = 0;
   for(int i = 0; i < (int)SW_PINS.size(); ++ i) {
     if(digitalRead(SW_PINS[i]) == LOW) {
@@ -237,141 +162,98 @@ unsigned int read_all_sw() {
   return pushed;
 }
 
-void handleRoot() {
-  String html = html_head;
-  html += get_html_text_input("ssid", rom.ssid, "SSID");
-  html += get_html_text_input("password", rom.password, "パスワード");
-  html += get_html_text_input("delay_time", rom.delay_time, "反応時間");
-  html += get_html_color_picker();
-  html += html_foot;
-  server.send(200, "text/html", html);
+int getKeyNumber(int layerIndex, int outputIndex, int inputIndex) {
+  return preferenceDocument["assign"][layerIndex][outputIndex][inputIndex]["num"].as<int>();
 }
 
-void handleSave() {
-  String msg = "";
-  for(int i = 0; i < server.args(); ++i) {
-    msg += server.argName(i) + " : " + server.arg(i) + "\n";
-    set_rom(server.argName(i), server.arg(i));
-  }
-  save_rom();
-
-  // LED set
-  for(int i = 0; i < LED_LENGTH; ++i) {
-    ledcWrite(LED_RGB_CHANNELS[i], rom.led_brightness[i]);
-  }
-  
-  server.send(200, "text/plain", msg);
+String getKeyText(int layerIndex, int outputIndex, int inputIndex) {
+  return preferenceDocument["assign"][layerIndex][outputIndex][inputIndex]["text"].as<String>();
 }
 
-void handleNotFound() {
-  server.send(404, "text/plain", "File Not Found.\n\nlink to\n192.168.4.1\n");
-}
+void loopKeyboard() {
+  // static variable defind.
+  static unsigned int swPushedBit = 0;
+  static int layerIndex = 0;
 
-void setup_config_server() {
-  is_config = true;
-  WiFi.softAP(rom.ssid, rom.password);
-  delay(100);
-  WiFi.softAPConfig(static_ip, static_ip, subnet);
-  server.on("/", handleRoot);
-  server.on("/save", handleSave);
-  server.onNotFound(handleNotFound);
-  server.begin();
-}
+  // measures for chattering.
+  if(swPushedBit != readAllPushedBit()) {
+    delay(10);
+    if(bleKeyboard.isConnected()) {
+      unsigned int currentSwPushedBit = readAllPushedBit();
+      unsigned int xorSwPushedBit = currentSwPushedBit ^ swPushedBit;
 
-BleKeyboard bleKeyboard(DEFAULT_DEVICE_NAME, DEFAULT_DEVICE_MANUFACTURER, 100);
-
-void setup_blekeyboard() {
-  bleKeyboard.begin();
-}
-
-void setup() {
-  // setting_sw pins setup
-  pinMode(SETTING_SW_PIN, INPUT_PULLUP);
-
-  // sw pins setup
-  for(int pin : SW_PINS) {
-    pinMode(pin, INPUT_PULLUP);
-  }
-
-  // EEPROM setup
-  EEPROM.begin(1024);
-  load_rom();
-  delay(10);
-
-  // LED pins setup
-  for(int i = 0; i < LED_LENGTH; ++i) {
-    ledcSetup(LED_RGB_CHANNELS[i], LEDC_BASE_FREQ, LEDC_RESOLUTION);
-    ledcAttachPin(LED_RGB_PINS[i], LED_RGB_CHANNELS[i]);
-    ledcWrite(LED_RGB_CHANNELS[i], rom.led_brightness[i]);
-  }
-  delay(10);
-
-  if(digitalRead(SETTING_SW_PIN) == LOW) {
-    setup_config_server();
-  } else {
-    setup_blekeyboard();
-  }
-}
-
-void loop() {
-  if(is_config) {
-    server.handleClient();
-  } else {
-    // static variable defind.
-    static unsigned int sw_pushed = 0;
-    static int keymap_layer = 0;
-    // measures for chattering.
-    if(sw_pushed != read_all_sw()) {
-      delay(10);
-
-      unsigned int cur_sw_pushed = read_all_sw();
-      unsigned int xor_sw_pushed = cur_sw_pushed ^ sw_pushed;
-      // for LED
-      // if(cur_sw_pushed & (1<<1)) {
-      //   PwmLed(LEDC_CHANNEL_R);
-      // }
-      // if(cur_sw_pushed & (1<<2)) {
-      //   PwmLed(LEDC_CHANNEL_G);
-      // }
-      // if(cur_sw_pushed & (1<<3)) {
-      //   PwmLed(LEDC_CHANNEL_B);
-      // }
-      // ble
-      if(bleKeyboard.isConnected()) {
-        int cur_keymap_layer = 0;
-        for(int i = 0; i < KEYMAPS_COLUMN_LENGTH; ++i) {
-          if(cur_sw_pushed & (1<<i)) {
-            cur_keymap_layer += rom.layers_switch[i];
+      int currentLayerIndex = 0;
+      for(int i = 0; i < INPUT_LENGTH; ++i) {
+        if(currentSwPushedBit & (1<<i)) {
+          if(getKeyNumber(0, 0 , i) >= 256) {
+            currentLayerIndex += getKeyNumber(0, 0 , i) - 256;
           }
+          
         }
-        if(keymap_layer != cur_keymap_layer) {
-          bleKeyboard.releaseAll();
-          for(int i = 0; i < KEYMAPS_COLUMN_LENGTH; ++i) {
-            if(rom.keymaps[cur_keymap_layer][i] != '\0') {
-              if(cur_sw_pushed & (1<<i)) {
-                bleKeyboard.press(rom.keymaps[cur_keymap_layer][i]);
-              }
-            }
-          }
-          keymap_layer = cur_keymap_layer;
-        } else {
-          for(int i = 0; i < (int)SW_PINS.size(); ++i) {
-            if(rom.keymaps[keymap_layer][i] == '\0') {
-              continue;
-            }
-            if(xor_sw_pushed & (1<<i)) {
-              if(cur_sw_pushed & (1<<i)) {
-                bleKeyboard.press(rom.keymaps[keymap_layer][i]);
-              } else {
-                bleKeyboard.release(rom.keymaps[keymap_layer][i]);
-              }
-            }
-          }
-        }
-        
       }
-      sw_pushed = cur_sw_pushed;
+      if(layerIndex != currentLayerIndex) {
+        bleKeyboard.releaseAll();
+        for(int i = 0; i < INPUT_LENGTH; ++i) {
+          if (currentSwPushedBit & (1<<i)) {
+            int keyNumber = getKeyNumber(currentLayerIndex, 0, i);
+            if (keyNumber < 0) {
+              // Serial.println(getKeyText(currentLayerIndex, 0, i));
+              bleKeyboard.print(getKeyText(currentLayerIndex, 0, i));
+            } else if (keyNumber < 256) {
+              // Serial.println(keyNumber);
+              bleKeyboard.press(keyNumber);
+            }
+          }
+        }
+        layerIndex = currentLayerIndex;
+      } else {
+        for(int i = 0; i < (int)SW_PINS.size(); ++i) {
+          if(xorSwPushedBit & (1<<i)) {
+            int keyNumber = getKeyNumber(currentLayerIndex, 0, i);
+            if(currentSwPushedBit & (1<<i)) {
+              if (keyNumber < 0) {
+                // Serial.println(getKeyText(currentLayerIndex, 0, i));
+                bleKeyboard.print(getKeyText(currentLayerIndex, 0, i));
+              } else if (keyNumber < 256) {
+                // Serial.println(keyNumber);
+                bleKeyboard.press(keyNumber);
+              }
+            } else {
+              if(0 <= keyNumber && keyNumber < 256) {
+                bleKeyboard.release(keyNumber);
+              }
+            }
+          }
+        }
+      }
+      swPushedBit = currentSwPushedBit;
     }
-    delay(rom.delay_time);
+  }
+  delay(INTERVAL_MS);
+}
+
+void setup()
+{
+  setupLed();
+
+  // Serial.begin(115200);
+
+  SPIFFS.begin();
+
+  setupPinMode();
+  if (digitalRead(PREFERENCE_SW_PIN) == LOW) {
+    isConfig = true;
+    setupPreferenceMode();
+  } else {
+    setupKeyboardMode();
+  }
+}
+
+void loop()
+{
+  if (isConfig) {
+    dnsServer.processNextRequest();
+  } else {
+    loopKeyboard();
   }
 }

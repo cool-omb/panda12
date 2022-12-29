@@ -1,0 +1,301 @@
+{
+  "version": "panda12 v1.1",
+  "length": {
+    "output": 1,
+    "input": 12,
+    "layer": 4
+  },
+  "preference": {
+    "interval": 50,
+    "ledOn": 0,
+    "ledRed": 100,
+    "ledGreen": 100,
+    "ledBlue": 100
+  },
+  "layout": [
+    [
+      {
+        "top": 0,
+        "left": 0,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "top": 0,
+        "left": 1,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "top": 0,
+        "left": 2,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "top": 0,
+        "left": 3,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "top": 1,
+        "left": 0,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "top": 1,
+        "left": 1,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "top": 1,
+        "left": 2,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "top": 1,
+        "left": 3,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "top": 2,
+        "left": 0,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "top": 2,
+        "left": 1,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "top": 2,
+        "left": 2,
+        "width": 1,
+        "height": 1
+      },
+      {
+        "top": 2,
+        "left": 3,
+        "width": 1,
+        "height": 1
+      }
+    ]
+  ],
+  "assign": [
+    [
+      [
+        {
+          "num": 225,
+          "text": ""
+        },
+        {
+          "num": 226,
+          "text": ""
+        },
+        {
+          "num": 227,
+          "text": ""
+        },
+        {
+          "num": 193,
+          "text": ""
+        },
+        {
+          "num": 53,
+          "text": ""
+        },
+        {
+          "num": 54,
+          "text": ""
+        },
+        {
+          "num": 55,
+          "text": ""
+        },
+        {
+          "num": 215,
+          "text": ""
+        },
+        {
+          "num": 57,
+          "text": ""
+        },
+        {
+          "num": 32,
+          "text": ""
+        },
+        {
+          "num": 57,
+          "text": ""
+        },
+        {
+          "num": 129,
+          "text": ""
+        }
+      ]
+    ],
+    [
+      [
+        {
+          "num": -1,
+          "text": "うぃーあーざじゃぱにーずごぶりんどぅゆぅはぶけいのたかとびおにごろしあいあむえぇとじゃぱにーずごぶりんあかあおきいろのおにずあんどもあはいびびっとしゃとるーずぐりーんおにせくしーみでぃあむばいおれっとおにむらさきだいだいしゃくなげおにらららいえるかなとぅないひゃっきやぎょう"
+        },
+        {
+          "num": -1,
+          "text": "test..fe."
+        },
+        {
+          "num": -1,
+          "text": "fsjeifjslaj"
+        },
+        {
+          "num": -1,
+          "text": "fsfklj"
+        },
+        {
+          "num": 53,
+          "text": ""
+        },
+        {
+          "num": 54,
+          "text": ""
+        },
+        {
+          "num": 55,
+          "text": ""
+        },
+        {
+          "num": 56,
+          "text": ""
+        },
+        {
+          "num": 57,
+          "text": ""
+        },
+        {
+          "num": 32,
+          "text": ""
+        },
+        {
+          "num": 57,
+          "text": ""
+        },
+        {
+          "num": -1,
+          "text": "fjsalfjlsajfklsjdlkfjsklajflkasjlkfjsklfjklsajfuikwiop;fgjmljadkfhglade"
+        }
+      ]
+    ],
+    [
+      [
+        {
+          "num": -1,
+          "text": "うぃーあーざじゃぱにーずごぶりんどぅゆぅはぶけいのたかとびおにごろしあいあむえぇとじゃぱにーずごぶりんあかあおきいろのおにずあんどもあはいびびっとしゃとるーずぐりーんおにせくしーみでぃあむばいおれっとおにむらさきだいだいしゃくなげおにらららいえるかなとぅないひゃっきやぎょう"
+        },
+        {
+          "num": -1,
+          "text": "test..fe."
+        },
+        {
+          "num": -1,
+          "text": "fsjeifjslaj"
+        },
+        {
+          "num": -1,
+          "text": "fsfklj"
+        },
+        {
+          "num": 53,
+          "text": ""
+        },
+        {
+          "num": 54,
+          "text": ""
+        },
+        {
+          "num": 55,
+          "text": ""
+        },
+        {
+          "num": 56,
+          "text": ""
+        },
+        {
+          "num": 57,
+          "text": ""
+        },
+        {
+          "num": 32,
+          "text": ""
+        },
+        {
+          "num": 57,
+          "text": ""
+        },
+        {
+          "num": -1,
+          "text": "fjsalfjlsajfklsjdlkfjsklajflkasjlkfjsklfjklsajfuikwiop;fgjmljadkfhglade"
+        }
+      ]
+    ],
+    [
+      [
+        {
+          "num": -1,
+          "text": "うぃーあーざじゃぱにーずごぶりんどぅゆぅはぶけいのたかとびおにごろしあいあむえぇとじゃぱにーずごぶりんあかあおきいろのおにずあんどもあはいびびっとしゃとるーずぐりーんおにせくしーみでぃあむばいおれっとおにむらさきだいだいしゃくなげおにらららいえるかなとぅないひゃっきやぎょう"
+        },
+        {
+          "num": -1,
+          "text": "test..fe."
+        },
+        {
+          "num": -1,
+          "text": "fsjeifjslaj"
+        },
+        {
+          "num": -1,
+          "text": "fsfklj"
+        },
+        {
+          "num": 53,
+          "text": ""
+        },
+        {
+          "num": 54,
+          "text": ""
+        },
+        {
+          "num": 55,
+          "text": ""
+        },
+        {
+          "num": 56,
+          "text": ""
+        },
+        {
+          "num": 57,
+          "text": ""
+        },
+        {
+          "num": 32,
+          "text": ""
+        },
+        {
+          "num": 57,
+          "text": ""
+        },
+        {
+          "num": -1,
+          "text": "fjsalfjlsajfklsjdlkfjsklajflkasjlkfjsklfjklsajfuikwiop;fgjmljadkfhglade"
+        }
+      ]
+    ]
+  ]
+}
