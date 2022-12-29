@@ -15,7 +15,7 @@ Bluetooth 接続の 12 キーキーボード。
 - [Arduino IDE 2.0.3](https://www.arduino.cc/en/software)
   - [Arduino core for the ESP32 v2.0.4](https://github.com/espressif/arduino-esp32#installation-instructions)
   - [NimBLE-Arduino v1.4.0](https://github.com/h2zero/NimBLE-Arduino)
-  - [ESP32-NimBLE-Keyboard](https://github.com/wakwak-koba/ESP32-NimBLE-Keyboard)
+  - [ESP32-NimBLE-Keyboard v1.4.0](https://github.com/wakwak-koba/ESP32-NimBLE-Keyboard)
   - [arduino-esp8266fs-plugin v0.5.0](https://github.com/esp8266/arduino-esp8266fs-plugin)
   - [Arduino ESP32 filesystem uploader v1.0](https://github.com/me-no-dev/arduino-esp32fs-plugin)
   - [ESP8266_Spiram](https://github.com/Gianbacchio/ESP8266_Spiram)
