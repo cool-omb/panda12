@@ -5,6 +5,7 @@
 #include <SPIFFS.h>
 #include "ArduinoJson.h"
 #include <FS.h>
+#include <BleKeyboard.h>
 
 using namespace std;
 
@@ -13,6 +14,8 @@ using namespace std;
 #define LED_B_PIN 26
 
 #define PREFERENCE_SW_PIN 13
+#define DEFAULT_DEVICE_NAME "Keyboard_Panda12"
+#define DEFAULT_DEVICE_MANUFACTURER "Panda12_manufacturer"
 
 bool is_config = false;
 const vector<int> SW_PINS{16, 19, 23, 14, 4, 18, 22, 27, 15, 17, 21, 26};
@@ -21,6 +24,9 @@ const char *SSID = "Preference_Keyboard";
 
 AsyncWebServer server(80);
 DNSServer dnsServer;
+
+BleKeyboard bleKeyboard(DEFAULT_DEVICE_NAME, DEFAULT_DEVICE_MANUFACTURER, 100);
+DynamicJsonDocument preferenceDocument(65536);
 
 void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
   // if (!index) {
@@ -97,7 +103,18 @@ void setupPreferenceMode() {
 }
 
 void setupKeyboardMode() {
+  File file = SPIFFS.open("/keymap.json", "r");
+  DeserializationError error = deserializeJson(preferenceDocument, file);
+  if (error) {
+    Serial.println(F("Error: deserializeJson"));
+    Serial.println(error.c_str());
+  }
+  JsonObject root = preferenceDocument.as<JsonObject>();
+  Serial.println(preferenceDocument["version"].as<String>());
+  file.close();
 
+  // Serial.println(String(preferenceDocument["version"]));
+  bleKeyboard.begin();
 }
 
 void setup()
@@ -110,6 +127,7 @@ void setup()
 
   setupPinMode();
   if (digitalRead(PREFERENCE_SW_PIN) == LOW) {
+    is_config = true;
     setupPreferenceMode();
   } else {
     setupKeyboardMode();
@@ -118,5 +136,9 @@ void setup()
 
 void loop()
 {
-  dnsServer.processNextRequest();
+  if (is_config) {
+    dnsServer.processNextRequest();
+  } else {
+
+  }
 }
