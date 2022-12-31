@@ -8,7 +8,7 @@ Bluetooth 接続の 12 キーキーボード。
 
 ## 使い方 Usage
 ### キーボード使用時
-スライドスイッチで電源を入れ、 `keyboard_panda12` にBluetooth接続する。
+スライドスイッチで電源を入れ、 `Test_keyboard` にBluetooth接続する。
 ### キーマップ設定時
 設定ボタンを押しながら電源を入れ、 `Preference_keyboard` にWiFi接続する。
 ブラウザからキーマップを変更後、 `保存` ボタンをクリックすることで変更が反映される。
