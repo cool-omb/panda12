@@ -18,7 +18,6 @@ using namespace std;
 #define LEDC_CHANNEL_G 1
 #define LEDC_CHANNEL_B 2
 
-
 #define PREFERENCE_SW_PIN 13
 #define DEFAULT_DEVICE_NAME "Test_Keyboard"
 #define DEFAULT_DEVICE_MANUFACTURER "Panda12_manufacturer"
@@ -43,30 +42,22 @@ DNSServer dnsServer;
 BleKeyboard bleKeyboard(DEFAULT_DEVICE_NAME, DEFAULT_DEVICE_MANUFACTURER, 100);
 DynamicJsonDocument preferenceDocument(65536);
 
-void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final){
-  // if (!index) {
-  //     request->_tempFile = SPIFFS.open("/" + filename, "w");
-  // }
-  // if (len) {
-  //     request->_tempFile.write(data, len);
-  // }
-  // if (final) {
-  //     request->_tempFile.close();
-  //     request->send(200, "text/plain", "filename: "+String(filename));
-  // }
+void handleUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
+{
+  return 1;
 }
 
-void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
-  if(!index){
-    // Serial.printf("BodyStart: %u B\n", total);
+void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+{
+  if (!index)
+  {
     request->_tempFile = SPIFFS.open("/keymap.json", "w");
   }
   request->_tempFile.write(data, len);
-  // Serial.printf("%s", (const char*)data);
-  if(index + len == total){
+  if (index + len == total)
+  {
     request->_tempFile.close();
     request->send(200, "text/plain", "Write keymap.json success.");
-    // Serial.printf("BodyEnd: %u B\n", total);
   }
 }
 
@@ -74,29 +65,29 @@ void webServerSetup()
 {
   server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
   server.on(
-    "/post",
-    HTTP_POST,
-    [](AsyncWebServerRequest* request){
-      request->send(200, "text/plain", "keymap.json posted.");
-    },
-    handleUpload,
-    handleBody
-  );
+      "/post",
+      HTTP_POST,
+      [](AsyncWebServerRequest *request)
+      {
+        request->send(200, "text/plain", "keymap.json posted.");
+      },
+      handleUpload,
+      handleBody);
 
   server.onNotFound([](AsyncWebServerRequest *request)
-  {
+                    {
     String redirectUrl = "http://";
     redirectUrl += WiFi.softAPIP().toString();
     redirectUrl += "/";
-    request->redirect(redirectUrl);
-  });
+    request->redirect(redirectUrl); });
 
   server.begin();
 }
 
-
-void setupLed() {
-  if(IS_LED_ON) {
+void setupLed()
+{
+  if (IS_LED_ON)
+  {
     ledcSetup(LEDC_CHANNEL_R, LEDC_BASE_FREQ, LEDC_RESOLUTION);
     ledcAttachPin(LED_R_PIN, LEDC_CHANNEL_R);
     ledcWrite(LEDC_CHANNEL_R, LED_R_BRIGHTNESS);
@@ -109,30 +100,32 @@ void setupLed() {
   }
 }
 
-void setupPinMode() {
+void setupPinMode()
+{
   pinMode(PREFERENCE_SW_PIN, INPUT_PULLUP);
-  for(int pin : SW_PINS) {
+  for (int pin : SW_PINS)
+  {
     pinMode(pin, INPUT_PULLUP);
   }
 }
 
-void setupPreferenceMode() {
+void setupPreferenceMode()
+{
   WiFi.softAP(SSID);
   dnsServer.start(53, "*", WiFi.softAPIP());
   webServerSetup();
 }
 
-void setupKeyboardMode() {
+void setupKeyboardMode()
+{
   File file = SPIFFS.open("/keymap.json", "r");
   DeserializationError error = deserializeJson(preferenceDocument, file);
-  if (error) {
-    // Serial.println(F("Error: deserializeJson"));
-    // Serial.println(error.c_str());
+  if (error)
+  {
+    return 0;
   }
   JsonObject root = preferenceDocument.as<JsonObject>();
 
-  // Serial.println(preferenceDocument["version"].as<String>());
-  // Serial.println(preferenceDocument["layout"][0].as<String>());
   file.close();
 
   LAYER_LENGTH = preferenceDocument["length"]["layer"].as<int>();
@@ -147,79 +140,101 @@ void setupKeyboardMode() {
   setupLed();
 
   delay(20);
-  // Serial.println(INPUT_LENGTH);
   bleKeyboard.begin();
   delay(100);
 }
 
-unsigned int readAllPushedBit() {
+unsigned int readAllPushedBit()
+{
   unsigned int pushed = 0;
-  for(int i = 0; i < (int)SW_PINS.size(); ++ i) {
-    if(digitalRead(SW_PINS[i]) == LOW) {
-      pushed |= (1<<i);
+  for (int i = 0; i < (int)SW_PINS.size(); ++i)
+  {
+    if (digitalRead(SW_PINS[i]) == LOW)
+    {
+      pushed |= (1 << i);
     }
   }
   return pushed;
 }
 
-int getKeyNumber(int layerIndex, int outputIndex, int inputIndex) {
+int getKeyNumber(int layerIndex, int outputIndex, int inputIndex)
+{
   return preferenceDocument["assign"][layerIndex][outputIndex][inputIndex]["num"].as<int>();
 }
 
-String getKeyText(int layerIndex, int outputIndex, int inputIndex) {
+String getKeyText(int layerIndex, int outputIndex, int inputIndex)
+{
   return preferenceDocument["assign"][layerIndex][outputIndex][inputIndex]["text"].as<String>();
 }
 
-void loopKeyboard() {
+void loopKeyboard()
+{
   // static variable defind.
   static unsigned int swPushedBit = 0;
   static int layerIndex = 0;
 
   // measures for chattering.
-  if(swPushedBit != readAllPushedBit()) {
+  if (swPushedBit != readAllPushedBit())
+  {
     delay(10);
-    if(bleKeyboard.isConnected()) {
+    if (bleKeyboard.isConnected())
+    {
       unsigned int currentSwPushedBit = readAllPushedBit();
       unsigned int xorSwPushedBit = currentSwPushedBit ^ swPushedBit;
 
       int currentLayerIndex = 0;
-      for(int i = 0; i < INPUT_LENGTH; ++i) {
-        if(currentSwPushedBit & (1<<i)) {
-          if(getKeyNumber(0, 0 , i) >= 256) {
-            currentLayerIndex += getKeyNumber(0, 0 , i) - 256;
+      for (int i = 0; i < INPUT_LENGTH; ++i)
+      {
+        if (currentSwPushedBit & (1 << i))
+        {
+          if (getKeyNumber(0, 0, i) >= 256)
+          {
+            currentLayerIndex += getKeyNumber(0, 0, i) - 256;
           }
-          
         }
       }
-      if(layerIndex != currentLayerIndex) {
+      if (layerIndex != currentLayerIndex)
+      {
         bleKeyboard.releaseAll();
-        for(int i = 0; i < INPUT_LENGTH; ++i) {
-          if (currentSwPushedBit & (1<<i)) {
+        for (int i = 0; i < INPUT_LENGTH; ++i)
+        {
+          if (currentSwPushedBit & (1 << i))
+          {
             int keyNumber = getKeyNumber(currentLayerIndex, 0, i);
-            if (keyNumber < 0) {
-              // Serial.println(getKeyText(currentLayerIndex, 0, i));
+            if (keyNumber < 0)
+            {
               bleKeyboard.print(getKeyText(currentLayerIndex, 0, i));
-            } else if (keyNumber < 256) {
-              // Serial.println(keyNumber);
+            }
+            else if (keyNumber < 256)
+            {
               bleKeyboard.press(keyNumber);
             }
           }
         }
         layerIndex = currentLayerIndex;
-      } else {
-        for(int i = 0; i < (int)SW_PINS.size(); ++i) {
-          if(xorSwPushedBit & (1<<i)) {
+      }
+      else
+      {
+        for (int i = 0; i < (int)SW_PINS.size(); ++i)
+        {
+          if (xorSwPushedBit & (1 << i))
+          {
             int keyNumber = getKeyNumber(currentLayerIndex, 0, i);
-            if(currentSwPushedBit & (1<<i)) {
-              if (keyNumber < 0) {
-                // Serial.println(getKeyText(currentLayerIndex, 0, i));
+            if (currentSwPushedBit & (1 << i))
+            {
+              if (keyNumber < 0)
+              {
                 bleKeyboard.print(getKeyText(currentLayerIndex, 0, i));
-              } else if (keyNumber < 256) {
-                // Serial.println(keyNumber);
+              }
+              else if (keyNumber < 256)
+              {
                 bleKeyboard.press(keyNumber);
               }
-            } else {
-              if(0 <= keyNumber && keyNumber < 256) {
+            }
+            else
+            {
+              if (0 <= keyNumber && keyNumber < 256)
+              {
                 bleKeyboard.release(keyNumber);
               }
             }
@@ -236,24 +251,28 @@ void setup()
 {
   setupLed();
 
-  // Serial.begin(115200);
-
   SPIFFS.begin();
 
   setupPinMode();
-  if (digitalRead(PREFERENCE_SW_PIN) == LOW) {
+  if (digitalRead(PREFERENCE_SW_PIN) == LOW)
+  {
     isConfig = true;
     setupPreferenceMode();
-  } else {
+  }
+  else
+  {
     setupKeyboardMode();
   }
 }
 
 void loop()
 {
-  if (isConfig) {
+  if (isConfig)
+  {
     dnsServer.processNextRequest();
-  } else {
+  }
+  else
+  {
     loopKeyboard();
   }
 }
